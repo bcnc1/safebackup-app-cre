@@ -231,10 +231,6 @@ function createWindow() {
 
 try {
 
-  // This method will be called when Electron has finished
-  // initialization and is ready to create browser windows.
-  // Some APIs can only be used after this event occurs.
-
   //kimcy
 const gotTheLock = app.requestSingleInstanceLock()
 
@@ -315,36 +311,6 @@ if (!gotTheLock) {
   // Catch Error
   // throw e;
 }
-
-/*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
- *  DataBase
- -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
- //for migration auto
-//  function knexCreateTable(tbl){
-//   knex.schema.hasTable(tbl).then(function(exists){
-//     if (!exists) {
-//       return knex.schema.createTable(tbl, function(t) {
-//         t.increments('id').primary();
-//         t.text('filename');
-//         t.integer('filesize');
-//         t.time('fileupdate',{useTz: true}); 
-//         t.integer('uploadstatus'); //0: 초기값(업로드해야), 1: 업로드완료 2:업데이트(아직업로드안됨, 업로드되면 1)
-//         t.integer('chainstatus'); //0: 초기값(업로드해야), 1: 업로드 완료, 2: 업로드에러 
-//       })
-//       .then(()=>{
-//         log.info('knexCreateTable');
-//         //return true;
-//       }).catch(()=>{
-//         log.error('knexCreateTable error');
-//         //return false;
-//       });
-//     }else{
-//       return "table name is already";
-//     }
-//   });
-//  }
-
-
 
  var sqlite3 = require('sqlite3').verbose();
  
@@ -830,20 +796,6 @@ if (!gotTheLock) {
     log.error('에러, SEND-CHAINFILE',e);
   }
 });
-
-
-/*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
- *  IPC : SEND FILE
- -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
-// ipcMain.on("SENDFILE", (event, arg) => {
-//   console.log('받음, main, SENDFILE => token:', arg.accessToken);
-//   try {
-//     sendFile(arg.index, arg.formData, arg.file, arg.accessToken, arg.username);
-//   } catch (e) {
-//     console.log(e);
-//   }
-// });
-
 
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
  *  IPC : ALERT
