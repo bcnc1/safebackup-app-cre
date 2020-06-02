@@ -63,11 +63,11 @@ var drBackupAutoLauncher = new AutoLaunch({
 });
 drBackupAutoLauncher.enable();
 
-
 /* 글로벌로 해야  garbage colllection이 안된다고함 */
 let tray = null;
 let contextMenu = null;
 
+let folderOption1Path = "c:\\safebackup\\option1.json";
 
 function createWindow() {
   console.log('createWindow');
@@ -135,7 +135,7 @@ function createWindow() {
  
    // The following is optional and will open the DevTools:
    if (isDev()) {
-     mainWindow.webContents.openDevTools();
+    //  mainWindow.webContents.openDevTools();
    } else {
      //kimcy: 3초후에 사라지게 요청
     setTimeout(function () {
@@ -249,7 +249,18 @@ if (!gotTheLock) {
   console.log('Ready');
   createWindow();
   createSBDatabBase();
-  initDataBackup()
+  initDataBackup();
+
+  if (!fs.existsSync(folderOption1Path)) {
+    let obj = {
+      'optionFor1Folder_IncludeSubFolder':'YES',
+      'optionFor2Folder_IncludeSubFolder':'YES',
+      'optionFor3Folder_IncludeSubFolder':'NO'
+    };
+    fs.writeFile(folderOption1Path, JSON.stringify(obj,null,2), function writeJSON(err) {
+      if (err) return log.error(err);
+    });
+  }
  });
 }
 
@@ -390,6 +401,25 @@ if (!gotTheLock) {
   //console.log('addFileFromDir => folderIndex = ', arg);
   //var tableName = arg.username+':'+arg.folderIndex;
   var tableName = arg.username;
+  let config3, folderOption1;
+
+  try{
+    config3 = JSON.parse(fs.readFileSync(folderOption1Path));
+    log.debug('option1.json exists',config3);
+    if(arg.folderIndex == 0){
+      folderOption1 = config3.optionFor1Folder_IncludeSubFolder;
+    }else if(arg.folderIndex == 1){
+      folderOption1 = config3.optionFor2Folder_IncludeSubFolder;
+    }else{
+      folderOption1 = config3.optionFor3Folder_IncludeSubFolder;
+    }
+    if(folderOption1 == null || folderOption1 == undefined){
+      folderOption1 = 'YES';
+    }
+  }catch(err){
+    log.debug('option1.json does NOT exist',err);
+    folderOption1 = 'YES';
+  }
 
   const watcher = chokidar.watch(arg.path, {
     ignored: /(^|[\/\\])\../, // ignore dotfiles
@@ -419,8 +449,13 @@ if (!gotTheLock) {
       //log.info('tableName = ', tableName);
       var  async = require("async");
       async.eachSeries(result, function(item, next) {
-
-        if(item.fullpath.toLowerCase().lastIndexOf('npki') > 0 && item.fullpath.lastIndexOf('.zip') < 0 ){  //npki 내부 파일들은 zip으로 압축해서 올려야 하기때문
+        let numberOfOriginalFolder = (arg.path.match(/\\/g) || []).length + 1;
+        if(
+          // npki 라는 경로가 있으면서 .zip이 아닌 파일은 업로드 하지 않는다
+          (item.fullpath.toLowerCase().lastIndexOf('npki') > 0 && item.fullpath.lastIndexOf('.zip') < 0)
+          // 만약 optionFor3Folder_IncludeSubFolder의 값이 no라면, 특정 폴더의 하위 폴더는 업로드 하지 않는다
+          || (folderOption1.toLowerCase() == 'no' && ((item.fullpath.match(/\\/g) || []).length)>numberOfOriginalFolder) 
+        ){  //npki 내부 파일들은 zip으로 압축해서 올려야 하기때문
           // DB에 기록하지 않는다.
           // knex(tableName)
           // .insert({filename: item.fullpath, filesize : item.size, 

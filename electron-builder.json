@@ -2,6 +2,7 @@
  "productName": "SafeBackup",
  "appId": "com.blab.safebackup",
   "directories": {
+    "buildResources":"build/",
     "output": "release/"
   },
     "files": [
@@ -20,26 +21,17 @@
         "!tsconfig.json",
         "!tslint.json"
     ],
-  "win": {
-    "icon": "dist",
-    "publish": [
-      {
-        "provider": "github",
-        "owner": "bcnc1",
-        "repo": "SafeBackUp.Update",
-        "releaseType": "release"
-      }
-    ],
-    "target": [
-      {
-        "target": "nsis",
-        "arch": [
-          "x64",
-          "ia32"
-        ]
-      }
-    ]
-  },
+    "win": {
+      "icon": "build/favicon.png",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "ia32"
+          ]
+        }
+      ]
+    },
   "mac": {
     "icon": "dist",
     "target": [
