@@ -529,11 +529,14 @@ if (!gotTheLock) {
                       });
                   }else if(uploadstatus == 1 && (chainstatus == 2 || chainstatus == 0)){
                     log.info('업로드 완료, 블록체인 실패, 파일변경 = ', item.fullpath, '체인은 = ',chainstatus);
+                    if(item.size < MaxByte){
                     knex(tableName)
                     .where({id: id})
-                    .update({filesize: item.size}).then((result)=>{
+                    .update({filesize: item.size, fileupdate: item.update
+                      , uploadstatus: 2, chainstatus: 0}).then((result)=>{
                         log.info('결과 = ',result);
                       });
+                    }
                   } else if(uploadstatus == 1 && chainstatus == 1){
                     log.info('업데이트목록으로, 파일변경 = ', item.fullpath);
                     if(item.size < MaxByte){
