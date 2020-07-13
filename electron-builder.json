@@ -1,6 +1,6 @@
 {
  "productName": "SafeBackup",
- "appId": "com.blab.safebackup",
+ "appId": "com.doctorkeeper.safebackup.dentop",
   "directories": {
     "buildResources":"build/",
     "output": "release/"

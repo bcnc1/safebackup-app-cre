@@ -56,6 +56,7 @@ export class M5MemberService extends M5Service {
     this.storage.remove('userToken');  //추후 삭제 안할수도..
     this.storage.remove('login');
     //this.storage.remove('password'); 패스워드 없애면 죽음 왜 안지울까?
+    this.storage.clear();
 
   }
 
@@ -103,128 +104,128 @@ export class M5MemberService extends M5Service {
         });
     });
 
-}
+  }
 
-public getLoginToken(member,storage , callback) {
-  var initializePromise = this.initialize(member.username, member.password);
+  public getLoginToken(member,storage , callback) {
+    var initializePromise = this.initialize(member.username, member.password);
 
-    initializePromise.then(function(result) {
-       log.info('getLoginToken => result : ',result);
-        var userToken = result[0];
-        member.token = userToken;
-        member.private = result[1];
-        member.noticeurgent = result[2];
-        member.nobackupdays = result[3];
+      initializePromise.then(function(result) {
+        log.info('getLoginToken => result : ',result);
+          var userToken = result[0];
+          member.token = userToken;
+          member.private = result[1];
+          member.noticeurgent = result[2];
+          member.nobackupdays = result[3];
 
-        storage.set('member',member);
-        callback(true);
-    }, function(err) {
-        log.error('토큰을 못 가지고 옴, => ',err);
-        callback(false);
-        //kimcy: 다 지우는게 맞나?
-        //storage.remove(member);
-    })
-}
+          storage.set('member',member);
+          callback(true);
+      }, function(err) {
+          log.error('토큰을 못 가지고 옴, => ',err);
+          callback(false);
+          //kimcy: 다 지우는게 맞나?
+          //storage.remove(member);
+      })
+  }
 
-private initUrgentNotice(member){
-  var options = { 
-    uri: M5MemberService.urgentGet,
-    method: 'GET',
-     headers: {
-      'Content-Type': 'application/json',
-      'X-Auth-Token': member.token
-    },
-    json : true
-  };
+  private initUrgentNotice(member){
+    var options = { 
+      uri: M5MemberService.urgentGet,
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Auth-Token': member.token
+      },
+      json : true
+    };
 
-  return new Promise(function (resolve, reject){
-    request.get(options, function(err, resp, body){
-        if(err){
-          reject(err);
-        } else{
-          if(resp.statusCode == 200){
-            var result = [];
-            result.push(body.title);
-            result.push(body.message);
-            result.push(body.url);
-            log.info('initUrgentNotice => ', result);
-            resolve(result);
-          }else{
-            reject(resp.headers);
+    return new Promise(function (resolve, reject){
+      request.get(options, function(err, resp, body){
+          if(err){
+            reject(err);
+          } else{
+            if(resp.statusCode == 200){
+              var result = [];
+              result.push(body.title);
+              result.push(body.message);
+              result.push(body.url);
+              log.info('initUrgentNotice => ', result);
+              resolve(result);
+            }else{
+              reject(resp.headers);
+            }
           }
-        }
+      });
     });
-  });
-}
+  }
 
-public getUrgentNotice(member,storage, callback) {
-  let urgent = this.initUrgentNotice(member);
+  public getUrgentNotice(member,storage, callback) {
+    let urgent = this.initUrgentNotice(member);
 
-    urgent.then(function(result) {
-       var urgent = new Urgent();
-        urgent.title = result[0];
-        urgent.message = result[1];
-        urgent.url = result[2];
+      urgent.then(function(result) {
+        var urgent = new Urgent();
+          urgent.title = result[0];
+          urgent.message = result[1];
+          urgent.url = result[2];
 
 
-        log.info('urgent success ',urgent);
-        storage.set('urgent',urgent);
-        callback(true);
+          log.info('urgent success ',urgent);
+          storage.set('urgent',urgent);
+          callback(true);
 
-    }, function(err) {
-        log.error('urgent fail ',err);
-        callback(false);
-    });
-}
+      }, function(err) {
+          log.error('urgent fail ',err);
+          callback(false);
+      });
+  }
 
-private initNoDaysNotice(member){
-  var options = { 
-    uri: M5MemberService.noBackupDays,
-    method: 'GET',
-     headers: {
-      'Content-Type': 'application/json',
-      'X-Auth-Token': member.token
-    },
-    json : true
-  };
+  private initNoDaysNotice(member){
+    var options = { 
+      uri: M5MemberService.noBackupDays,
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Auth-Token': member.token
+      },
+      json : true
+    };
 
-  return new Promise(function (resolve, reject){
-    request.get(options, function(err, resp, body){
-        if(err){
-          reject(err);
-        } else{
-          if(resp.statusCode == 200){
-            var result = [];
-            result.push(body.title);
-            result.push(body.message);
-            result.push(body.url);
-            log.info('initNoDaysNotice => ', result);
-            resolve(result);
-          }else{
-            reject(resp.headers);
+    return new Promise(function (resolve, reject){
+      request.get(options, function(err, resp, body){
+          if(err){
+            reject(err);
+          } else{
+            if(resp.statusCode == 200){
+              var result = [];
+              result.push(body.title);
+              result.push(body.message);
+              result.push(body.url);
+              log.info('initNoDaysNotice => ', result);
+              resolve(result);
+            }else{
+              reject(resp.headers);
+            }
           }
-        }
+      });
     });
-  });
-}
+  }
 
-public getBackupDays(member,storage, callback){
-  let noDays = this.initNoDaysNotice(member);
+  public getBackupDays(member,storage, callback){
+    let noDays = this.initNoDaysNotice(member);
 
-  noDays.then( function(result){
-    var backupDays = new Backup();
-    backupDays.title = result[0];
-    backupDays.message = result[1];
-    backupDays.url = result[2];
-    log.info('BackupDay success ');
-    storage.set('backupday',backupDays);
-    callback(true);
+    noDays.then( function(result){
+      var backupDays = new Backup();
+      backupDays.title = result[0];
+      backupDays.message = result[1];
+      backupDays.url = result[2];
+      log.info('BackupDay success ');
+      storage.set('backupday',backupDays);
+      callback(true);
 
-  }, function(err){
-    log.error('BackupDays fail ',err);
-    callback(false);
-  });
-}
+    }, function(err){
+      log.error('BackupDays fail ',err);
+      callback(false);
+    });
+  }
 
   private handleMemberDetailResponse(response: any) {
     console.log('>>> handleMemberDetailResponse', response);

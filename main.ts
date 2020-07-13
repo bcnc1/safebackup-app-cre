@@ -8,7 +8,6 @@ import { userInfo } from "os";
 import { LoggerConfig } from "ngx-logger";
 import * as moment from 'moment';
 
-
 const {app, BrowserWindow, ipcMain} = require("electron");
 const fs = require("fs");
 const url = require("url");
@@ -26,7 +25,7 @@ const Menu = require('electron').Menu;
 const dialog = electron.dialog;
 const log = require('electron-log');
 const updater = require('electron-simple-updater');
-const { autoUpdater } = require("electron-updater")
+// const { autoUpdater } = require("electron-updater")
 
 //kimcy
 const reqestProm = require('request-promise-native')
@@ -37,6 +36,7 @@ const chokidar = require('chokidar');
 
 let isQuiting = false;
 var isOpenDialog = false;
+
 
 var knex = require('knex')({
   client: 'sqlite3',
@@ -51,10 +51,10 @@ const zipper = require('zip-local');
 
 const STORAGE_URL = 'https://ssproxy.ucloudbiz.olleh.com/v1/AUTH_10b1107b-ce24-4cb4-a066-f46c53b474a3'
 
-// if (handleSquirrelEvent(app)) {
-//   // squirrel event handled and app will exit in 1000ms, so don't do anything else
-//   app.exit(0); //return;
-// }
+if (handleSquirrelEvent(app)) {
+  // squirrel event handled and app will exit in 1000ms, so don't do anything else
+  app.exit(0); //return;
+}
 
 let mainWindow;
 
@@ -92,7 +92,7 @@ function createWindow() {
      }
    ]);
  
-   tray.setToolTip('안심백업 v3.3.1');
+   tray.setToolTip('안심백업 v0.68.2');
    tray.setContextMenu(contextMenu);
  
    tray.on('click', function (e) {
@@ -184,48 +184,39 @@ function createWindow() {
  
    
    /*---------------------------------------------------------------
-            Updater
-            kimcy: 업데이트 기능없음
+    Auto Updater
     ----------------------------------------------------------------*/
-    autoUpdater.checkForUpdates();
-
-    autoUpdater.on('checking-for-update', () => {
-      log.info("checking-for-update");
-    });
-
-    autoUpdater.on('update-available', (info) => {
-      log.info("update-available");
-    });
-
-    autoUpdater.on('update-not-available', (info) => {
-      log.info("update-not-available");
-    });
-
-    autoUpdater.on('error', (err) => {
-      log.info("error = ",err);
-    });
-
-    autoUpdater.on('download-progress', (progressObj) => {
-      log.info("download-progress");
-    });
-
-    autoUpdater.on('update-downloaded', (info) => {
-      log.info("update-downloaded = ",info);
-      
-      isOpenDialog = true;
-
-      const dialogOpts = {
-        title:'Application Update',
-        message: '새 업데이트 버전이 있습니다.',
-        type: "info"
-      }
-      dialog.showMessageBox(dialogOpts,(returnValue)=>{
-        if(returnValue === 0) {
-          isOpenDialog = false;
-          autoUpdater.quitAndInstall();  
-        }
-      });
-    });
+    // autoUpdater.checkForUpdates();
+    // autoUpdater.on('checking-for-update', () => {
+    //   log.info("checking-for-update");
+    // });
+    // autoUpdater.on('update-available', (info) => {
+    //   log.info("update-available");
+    // });
+    // autoUpdater.on('update-not-available', (info) => {
+    //   log.info("update-not-available");
+    // });
+    // autoUpdater.on('error', (err) => {
+    //   log.info("error = ",err);
+    // });
+    // autoUpdater.on('download-progress', (progressObj) => {
+    //   log.info("download-progress");
+    // });
+    // autoUpdater.on('update-downloaded', (info) => {
+    //   log.info("update-downloaded = ",info);
+      // isOpenDialog = true;
+      // const dialogOpts = {
+      //   title:'Application Update',
+      //   message: '새 업데이트 버전이 있습니다.',
+      //   type: "info"
+      // }
+      // dialog.showMessageBox(dialogOpts,(returnValue)=>{
+      //   if(returnValue === 0) {
+      //     isOpenDialog = false;
+      //     autoUpdater.quitAndInstall();  
+      //   }
+      // });
+    // });
 
 }
 
@@ -1284,7 +1275,7 @@ function handleSquirrelEvent(application) {
     case '--squirrel-uninstall':
       // Undo anything you did in the --squirrel-install and
       // --squirrel-updated handlers
-
+      localStorage.clear();
       // Remove desktop and start menu shortcuts
       spawnUpdate(['--removeShortcut', exeName]);
 
