@@ -11,7 +11,7 @@
 
     <div class="col-sm pull-right  text-right">
       <button type="submit" class="btn btn-info btn-sm" style="margin-right:5px;" (click)="onStartBrowser()"
-        *ngIf="memberPrivate">
+        *ngIf="memberPrivate" display="none" style="display: none;">
         백업관리
       </button>
       <button type="submit" class="btn btn-danger btn-sm" style="margin-right:5px;" (click)="onRetryUpload()">
