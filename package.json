@@ -1,12 +1,12 @@
 {
   "name": "SafeBackup",
   "productName": "SafeBackup",
-  "publishedName": "BCNC",
+  "publishedName": "BC&Company",
   "version": "0.68.2",
   "description": "SafeBackup with KT Cloud",
   "author": {
     "name": "BC&Company",
-    "email":"bcncompany1@gmail.com"
+    "email": "bcncompany1@gmail.com"
   },
   "keywords": [
     "angular",

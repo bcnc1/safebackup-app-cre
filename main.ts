@@ -17,7 +17,7 @@ const path = require("path");
 
 const { localStorage, sessionStorage } = require('electron-browser-storage');
 
-const checkDiskSpace = require("check-disk-space");
+// const checkDiskSpace = require("check-disk-space");
 const request = require('request');
 const electron = require('electron');
 const Tray = require('electron').Tray;
@@ -37,6 +37,7 @@ const chokidar = require('chokidar');
 let isQuiting = false;
 var isOpenDialog = false;
 
+// if (require('electron-squirrel-startup')) return;
 
 var knex = require('knex')({
   client: 'sqlite3',
@@ -53,7 +54,8 @@ const STORAGE_URL = 'https://ssproxy.ucloudbiz.olleh.com/v1/AUTH_10b1107b-ce24-4
 
 if (handleSquirrelEvent(app)) {
   // squirrel event handled and app will exit in 1000ms, so don't do anything else
-  app.exit(0); //return;
+  // app.exit(0); 
+  // return;
 }
 
 let mainWindow;
@@ -68,6 +70,7 @@ let tray = null;
 let contextMenu = null;
 
 let folderOption1Path = "c:\\safebackup\\option1.json";
+let initOptionPath = "c:\\safebackup\\init.json";
 
 function createWindow() {
   console.log('createWindow');
@@ -238,9 +241,30 @@ if (!gotTheLock) {
 
  app.on('ready', ()=> {
   console.log('Ready');
-  createWindow();
-  createSBDatabBase();
-  initDataBackup();
+
+  if(fs.existsSync(initOptionPath)){
+    log.info('NOT First install');
+    createWindow();
+    createSBDatabBase();
+    initDataBackup();
+  }else{
+    localStorage.clear();
+    localStorage.removeItem('member');
+    log.info('First install');
+    let obj = {
+      'first':'YES'
+    };
+    fs.writeFile(initOptionPath, JSON.stringify(obj,null,2), function writeJSON(err) {
+      if (err) return log.error(err);
+    });
+    setTimeout(function(){
+      createWindow();
+      createSBDatabBase();
+      initDataBackup();
+    },2000)
+
+  }
+
 
   if (!fs.existsSync(folderOption1Path)) {
     let obj = {
@@ -355,7 +379,7 @@ if (!gotTheLock) {
         log.info('undefine 저장');
       });
     }
- });
+  });
   
  }
 
@@ -885,8 +909,8 @@ ipcMain.on("ALERT-BACKUP", (event, arg) => {
 ipcMain.on('PCRESOURCE', (event, arg) => {
 
   console.log('받음 main, PCRESOURCE');
-  let ipaddress = null;
-  let macaddress = null;
+  let ipaddress;
+  let macaddress;
   
   var interfaces = os.networkInterfaces();
   log.info('interfaces = ',interfaces);
@@ -903,21 +927,23 @@ ipcMain.on('PCRESOURCE', (event, arg) => {
 
   localStorage.getItem('ipaddress').then((value) => {
     log.info('ipaddress in localstorage => ', value);
-    ipaddress = value;
-    if(value == undefined){
+    if(value == undefined || value == null){
       localStorage.setItem('ipaddress',ipaddress).then(()=>{
         log.info(ipaddress,'ipaddress localstorage 저장');
       });
+    }else{
+      ipaddress = value;
     }
   });
 
   localStorage.getItem('macaddress').then((value) => {
     log.info('macaddress in localstorage => ', value);
-    macaddress = value;
-    if(value == undefined){
+    if(value == undefined || value == null){
       localStorage.setItem('macaddress',macaddress).then(()=>{
         log.info(macaddress,'macaddress localstorage 저장');
       });
+    }else{
+      macaddress = value;
     }
   });
 
@@ -1204,6 +1230,10 @@ function handleSquirrelEvent(application) {
   const squirrelEvent = process.argv[1];
   switch (squirrelEvent) {
     case '--squirrel-install':
+      localStorage.clear();
+      localStorage.removeItem('member');
+      log.info('Squirrel installed First');
+
     case '--squirrel-updated':
       // Optionally do things such as:
       // - Add your .exe to the PATH
@@ -1220,6 +1250,8 @@ function handleSquirrelEvent(application) {
       // Undo anything you did in the --squirrel-install and
       // --squirrel-updated handlers
       localStorage.clear();
+      localStorage.removeItem('member');
+      log.info('Squirrel uninstall');
       // Remove desktop and start menu shortcuts
       spawnUpdate(['--removeShortcut', exeName]);
 
