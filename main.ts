@@ -933,6 +933,7 @@ ipcMain.on('PCRESOURCE', (event, arg) => {
       });
     }else{
       ipaddress = value;
+      log.info('ipaddress from localstorage');
     }
   });
 
@@ -944,6 +945,7 @@ ipcMain.on('PCRESOURCE', (event, arg) => {
       });
     }else{
       macaddress = value;
+      log.info('macaddress from localstorage');
     }
   });
 
