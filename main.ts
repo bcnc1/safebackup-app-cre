@@ -357,7 +357,7 @@ if (!gotTheLock) {
     }
  });
   
-}
+ }
 
  function createTable(tableName, window, callback){
    console.log('createTable');
@@ -679,67 +679,12 @@ if (!gotTheLock) {
     })
  });
 
-
  /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
  *  IPC : REQ-CHAINTREE
  *  모든 테이블을 뒤져야 한다.
  -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
  ipcMain.on("REQ-CHAINTREE", (event, arg) => {
   console.log('받음, REQ-CHAINTREE, main folderIndex = ',arg.folderIndex);
- 
-  //db table이 여러개일때..
-  // var chaintree = [];
-  // localStorage.getItem('maxfolder').then((value) => {
-  //   log.info('폴더는 => ', value);
-
-  //   getChaintree(value);
-
-
-
-  // });
-
- 
-  // //db table의 여러개일때..
-  // function getChaintree(maxfolder){
-  //   console.log('getChaintree ');
-  //   for(let i = maxfolder; i >= 0 ; i--){
-  //     setTimeout(()=>{
-  //       if(i == 0){
-  //         //log.info('체인에러결과 = ', chaintree);
-  //         if(mainWindow && !mainWindow.isDestroyed()){
-  //             log.info('보냄 CHAINTREE, main ', chaintree);
-  //             mainWindow.webContents.send("CHAINTREE", {tree:chaintree});
-  //         }
-  //       }else{
-  //         knex.schema.hasTable(arg.username+':'+(maxfolder - i)).then((exists) =>{
-  //           if(exists){
-  //             var tableName = arg.username+':'+(maxfolder - i);
-  //             //console.log('tablename = ', tableName);
-  //             knex(tableName)
-  //             .where({uploadstatus: 1})
-  //             .whereNot({
-  //               chainstatus: 1  
-  //             }).then((results) => {
-  //                 //log.info('테이블 조회 결과 = ', results);
-  //                 if(results.length > 0){
-  //                   results.forEach(function(element){
-  //                     //log.info('11..element = ', element);
-  //                     element.tbName = tableName;
-  //                    // log.info('22..element = ', element);
-  //                     chaintree.push(element);
-  //                   });
-  //                 }
-  //             });
-  //           }
-  //         });
-  //       }
-        
-  //     }, (maxfolder - i)*300)
-  //   }
-  // }
-
-  
-
  
  //db 테이블이 1개일때..
   var tableName = arg.username;
@@ -761,7 +706,6 @@ if (!gotTheLock) {
       }
     })
  });
-
 
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
  *  IPC : GET FILES
@@ -941,17 +885,15 @@ ipcMain.on("ALERT-BACKUP", (event, arg) => {
 ipcMain.on('PCRESOURCE', (event, arg) => {
 
   console.log('받음 main, PCRESOURCE');
+  let ipaddress = null;
+  let macaddress = null;
+  
   var interfaces = os.networkInterfaces();
-
   log.info('interfaces = ',interfaces);
 
   var maps = Object.keys(interfaces)
     .map(x => interfaces[x].filter(x => x.family === 'IPv4' && !x.internal)[0])
     .filter(x => x);
-
-  let ipaddress = null;
-  let macaddress = null;
-
 
   log.info('maps =>',maps);
   if(maps != null) {
@@ -959,9 +901,28 @@ ipcMain.on('PCRESOURCE', (event, arg) => {
     macaddress = maps[0].mac;
   }
 
+  localStorage.getItem('ipaddress').then((value) => {
+    log.info('ipaddress in localstorage => ', value);
+    ipaddress = value;
+    if(value == undefined){
+      localStorage.setItem('ipaddress',ipaddress).then(()=>{
+        log.info(ipaddress,'ipaddress localstorage 저장');
+      });
+    }
+  });
+
+  localStorage.getItem('macaddress').then((value) => {
+    log.info('macaddress in localstorage => ', value);
+    macaddress = value;
+    if(value == undefined){
+      localStorage.setItem('macaddress',macaddress).then(()=>{
+        log.info(macaddress,'macaddress localstorage 저장');
+      });
+    }
+  });
+
   log.info('ipaddress = ',ipaddress);
   log.info('macaddress = ',macaddress);
-
 
   if(mainWindow && !mainWindow.isDestroyed()){
     log.info('보냄 main, PCRESOURCE');
@@ -971,27 +932,6 @@ ipcMain.on('PCRESOURCE', (event, arg) => {
       macaddress: macaddress
     });
   }
-
-  //const cpus = os.cpus();
-
-
-  //const path = os.platform() === 'win32' ? 'C:/' : '/';
-
-  // checkDiskSpace(path).then((diskSpace) => {
-    
-  //   if(mainWindow && !mainWindow.isDestroyed()){
-  //     log.info('보냄 main, PCRESOURCE');
-  //     mainWindow.webContents.send("PCRESOURCE", {
-  //       cpus: cpus,
-  //       disk: diskSpace,
-  //       ipaddresses: maps,
-  //       ipaddress: ipaddress,
-  //       macaddress: macaddress
-  //     });
-  //   }
-
-  // });
-
 
 });
 
@@ -1122,12 +1062,13 @@ ipcMain.on('SELECTFOLDER', (event, arg) => {
   reqestProm(options, chainuploadCb)
 
  }
+
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
  *  FILE을 KT 스토리지에 저장하고 db에 기록
  *  KT Storage 서버에 사용자 키를 가져오고 저장한다. promise로 구현
  *  container명은 로그인시 id로...
  -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
- var fileupload = function (arg){
+  var fileupload = function (arg){
 
   var upload = null;
   var r = null;
