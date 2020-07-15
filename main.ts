@@ -651,7 +651,7 @@ if (!gotTheLock) {
   }
  }
  
- /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+/*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
  *  IPC : ADD-ZIPFILE
  -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 //  ipcMain.on("ADD-ZIPFILE", (event, arg) => {
@@ -660,7 +660,7 @@ if (!gotTheLock) {
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
  *  IPC : REQ-UPDATETREE
  -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
- ipcMain.on("REQ-UPDATETREE", (event, arg) => {
+ipcMain.on("REQ-UPDATETREE", (event, arg) => {
   console.log('받음, REQ-UPDATETREE, main folderIndex = ',arg.folderIndex);
  // var tableName = arg.username+':'+arg.folderIndex;
  var tableName = arg.username;
@@ -679,12 +679,12 @@ if (!gotTheLock) {
         mainWindow.webContents.send("UPDATETREE", {tree:results});
       }
     })
- });
+});
 
- /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+/*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
  *  IPC : REQ-UPLOADTREE
  -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
- ipcMain.on("REQ-UPLOADTREE", (event, arg) => {
+ipcMain.on("REQ-UPLOADTREE", (event, arg) => {
   console.log('받음, REQ-UPLOADTREE, main folderIndex = ',arg.folderIndex);
   //var tableName = arg.username+':'+arg.folderIndex;
   var tableName = arg.username;
@@ -701,13 +701,13 @@ if (!gotTheLock) {
         mainWindow.webContents.send("UPLOADTREE", {tree:results});
       }
     })
- });
+});
 
- /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+/*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
  *  IPC : REQ-CHAINTREE
  *  모든 테이블을 뒤져야 한다.
  -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
- ipcMain.on("REQ-CHAINTREE", (event, arg) => {
+ipcMain.on("REQ-CHAINTREE", (event, arg) => {
   console.log('받음, REQ-CHAINTREE, main folderIndex = ',arg.folderIndex);
  
  //db 테이블이 1개일때..
@@ -729,13 +729,13 @@ if (!gotTheLock) {
         mainWindow.webContents.send("CHAINTREE", {tree:results});
       }
     })
- });
+});
 
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
  *  IPC : GET FILES
  -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 
- ipcMain.on("GETFOLDERTREE", (event, arg) => {
+ipcMain.on("GETFOLDERTREE", (event, arg) => {
   
   log.info('받음, GETFOLDERTREE, arg = ',arg);
   if (arg.path == null) {  //이게 없으면 watcher동작 안함
@@ -770,8 +770,8 @@ if (!gotTheLock) {
 
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
  *  IPC : SEND-FILE
- -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
- ipcMain.on("SEND-FILE", (event, arg) => {
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
+ipcMain.on("SEND-FILE", (event, arg) => {
   console.log('받음, main, SEND-FILE ');
   
   try {
@@ -784,8 +784,8 @@ if (!gotTheLock) {
 
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
  *  IPC : SEND-CHAINFILE
- -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
- ipcMain.on("SEND-CHAINFILE", (event, arg) => {
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
+ipcMain.on("SEND-CHAINFILE", (event, arg) => {
   console.log('받음, main, SEND-CHAINFILE ');
   try {
     chainupload(arg);
@@ -796,7 +796,7 @@ if (!gotTheLock) {
 
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
  *  IPC : ALERT
- -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 ipcMain.on("ALERT", (event, arg) => {
   //console.log(arg);
   //mainWindow.show();
@@ -850,10 +850,10 @@ ipcMain.on("ALERT-BACKUP", (event, arg) => {
 });
 
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
- *  Urgent-Read
- -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
- const apiRead = "http://211.252.85.59:3000/api/v1/notice/urgent/read"
- var urgentRead = function(member){
+*  Urgent-Read
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
+const apiRead = "http://211.252.85.59:3000/api/v1/notice/urgent/read"
+var urgentRead = function(member){
 
   function urgentReadCb(error, response, body){
     if (!error && response.statusCode == 200){
@@ -874,13 +874,13 @@ ipcMain.on("ALERT-BACKUP", (event, arg) => {
   };
 
   reqestProm(options, urgentReadCb)
- }
+}
 
- /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
- *  noBackupDays-Read
- -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
- const apiBackupRead = "http://211.252.85.59:3000/api/v1/notice/nobackupdays/read"
- var noBackupRead = function(member){
+/*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+*  noBackupDays-Read
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
+const apiBackupRead = "http://211.252.85.59:3000/api/v1/notice/nobackupdays/read"
+var noBackupRead = function(member){
 
   function noBackupReadCb(error, response, body){
     if (!error && response.statusCode == 200){
@@ -901,7 +901,7 @@ ipcMain.on("ALERT-BACKUP", (event, arg) => {
   };
 
   reqestProm(options, noBackupReadCb)
- }
+}
 
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
  *  IPC : PC RESOURCE
@@ -1020,7 +1020,7 @@ ipcMain.on('SELECTFOLDER', (event, arg) => {
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
  *  chain upload
  -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
- var chainupload = function (arg){
+var chainupload = function (arg){
    console.log('블록체인 기록을 위한 api');
   let method, url;
 
@@ -1089,14 +1089,14 @@ ipcMain.on('SELECTFOLDER', (event, arg) => {
 
   reqestProm(options, chainuploadCb)
 
- }
+}
 
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
  *  FILE을 KT 스토리지에 저장하고 db에 기록
  *  KT Storage 서버에 사용자 키를 가져오고 저장한다. promise로 구현
  *  container명은 로그인시 id로...
  -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
-  var fileupload = function (arg){
+var fileupload = function (arg){
 
   var upload = null;
   var r = null;
@@ -1196,7 +1196,7 @@ ipcMain.on('SELECTFOLDER', (event, arg) => {
    } catch(err){
     log.error('업로드 에러 : ',err);
    }
- }
+}
 
 
 function handleSquirrelEvent(application) {

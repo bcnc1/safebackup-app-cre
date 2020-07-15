@@ -135,6 +135,20 @@ export class HomePageComponent implements OnInit, OnDestroy {
 
   }
 
+  onNullifyFolder(folderIndex) {
+    // this.selectedFolderIndex = folderIndex;
+    log.info('Nullify selected Folder, folderIndex = ',folderIndex );
+    const folderKey = this.getFolderKey(folderIndex);
+    // this.storageService.set(folderKey, ''); //key: 예:folder:pharmbase:0
+    this.storageService.remove(folderKey);
+    this.showingFolderName = '';
+    // this.electronService.ipcRenderer.send('SELECTFOLDER', {
+    //   folderIndex: folderIndex,
+    //   username: this.member.username
+    // });
+    // this.storageService.set('login',false);
+  }
+
 
   onRequestFolderData(folderIndex) {
     console.log('home-page, onRequestFolderData');
@@ -237,7 +251,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
 
   }
 
-checkDay(day){
+  checkDay(day){
     //저장된파일이름
     //let filename;
     //let maxDate = moment().year(1990).month(0).date(1);
@@ -260,7 +274,7 @@ checkDay(day){
       log.error('checkDay, 저장된 zip파일명 없음')
       return false;
     }
-}
+  }
 
   onStartBrowser(){
     require('electron').shell.openExternal("http://211.252.85.59/login");

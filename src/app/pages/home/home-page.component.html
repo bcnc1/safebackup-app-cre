@@ -95,17 +95,26 @@
           <span *ngIf="showingFolderName.length==0">백업할 폴더를 선택하세요</span>
         </div>
         <div class="float-right">
-
           <button type="button" class="btn btn-secondary btn-sm" (click)="onChangeFolder(0)"
             *ngIf="selectedFolderIndex==0">폴더선택
+          </button>
+          <button type="button" class="btn btn-light btn-sm" (click)="onNullifyFolder(0)"
+            *ngIf="selectedFolderIndex==0">해지
           </button>
           <button type="button" class="btn btn-secondary btn-sm" (click)="onChangeFolder(1)"
             *ngIf="selectedFolderIndex==1">폴더선택
           </button>
+          <button type="button" class="btn btn-light btn-sm" (click)="onNullifyFolder(1)"
+            *ngIf="selectedFolderIndex==1">해지
+          </button>
           <button type="button" class="btn btn-secondary btn-sm" (click)="onChangeFolder(2)"
             *ngIf="selectedFolderIndex==2">폴더선택
           </button>
+          <button type="button" class="btn btn-light btn-sm" (click)="onNullifyFolder(2)"
+            *ngIf="selectedFolderIndex==2">해지
+          </button>
         </div>
+
       </div>
 
 
