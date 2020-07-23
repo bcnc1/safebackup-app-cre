@@ -29,15 +29,11 @@ const updater = require('electron-simple-updater');
 
 //kimcy
 const reqestProm = require('request-promise-native')
-
 var AutoLaunch = require('auto-launch');
-
 const chokidar = require('chokidar');
 
 let isQuiting = false;
 var isOpenDialog = false;
-
-// if (require('electron-squirrel-startup')) return;
 
 var knex = require('knex')({
   client: 'sqlite3',
@@ -46,10 +42,9 @@ var knex = require('knex')({
     timezone     : 'utc',   //time존 적용을 연구해야..
   }
 });
+
 var member;
-
 const zipper = require('zip-local');
-
 const STORAGE_URL = 'https://ssproxy.ucloudbiz.olleh.com/v1/AUTH_10b1107b-ce24-4cb4-a066-f46c53b474a3'
 
 if (handleSquirrelEvent(app)) {
@@ -72,48 +67,50 @@ let contextMenu = null;
 let folderOption1Path = "c:\\safebackup\\option1.json";
 let initOptionPath = "c:\\safebackup\\init.json";
 
+let firstInstall = false;
+
 function createWindow() {
   console.log('createWindow');
   /*---------------------------------------------------------------
                TRAY
    ----------------------------------------------------------------*/
-   tray = new Tray(path.join(__dirname, '/dist/assets/icons/tray-icon.png'));
-   contextMenu = Menu.buildFromTemplate([
-     {
-       label: '보기',
-       click: function () {
-         mainWindow.show();
-       }
-     },
-     {
-       label: '종료',
-       click: function () {
-         isQuiting = true;
-         console.log('트레이종료');
-         app.quit();
-       }
-     }
-   ]);
- 
-   tray.setToolTip('안심백업 v0.68.2');
-   tray.setContextMenu(contextMenu);
- 
-   tray.on('click', function (e) {
-     setTimeout(function () {
-       mainWindow.minimize();
-     }, 3000);
-   });
-   contextMenu.on('menu-will-close', (event) => {
-     for (let item of event.sender.items) {
-       if (item.checked) log.warn("Menu item checked:", item.label)
-     }
-   });
+  tray = new Tray(path.join(__dirname, '/dist/assets/icons/tray-icon.png'));
+  contextMenu = Menu.buildFromTemplate([
+    {
+      label: '보기',
+      click: function () {
+        mainWindow.show();
+      }
+    },
+    {
+      label: '종료',
+      click: function () {
+        isQuiting = true;
+        console.log('트레이종료');
+        app.quit();
+      }
+    }
+  ]);
+
+  tray.setToolTip('안심백업 v0.68.2');
+  tray.setContextMenu(contextMenu);
+
+  tray.on('click', function (e) {
+    setTimeout(function () {
+      mainWindow.minimize();
+    }, 3000);
+  });
+  contextMenu.on('menu-will-close', (event) => {
+    for (let item of event.sender.items) {
+      if (item.checked) log.warn("Menu item checked:", item.label)
+    }
+  });
  
    /*---------------------------------------------------------------
               Main Window
     ----------------------------------------------------------------*/
 
-   mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 1000,
     height: 600,
     webPreferences: {
@@ -123,69 +120,73 @@ function createWindow() {
     autoHideMenuBar: true
   });
 
-   mainWindow.loadURL(
-     url.format({
-       pathname: path.join(__dirname, `/dist/index.html`),
-       protocol: "file:",
-       slashes: true
-     })
-   );
+  mainWindow.loadURL(
+    url.format({
+      pathname: path.join(__dirname, `/dist/index.html`),
+      protocol: "file:",
+      slashes: true
+    })
+  );
  
    //kimcy: release 할때는 해당 부부을 false, 개발할때는 true
-   function isDev() {
-     return false;
-   };
+  function isDev() {
+    return false;
+  };
  
    // The following is optional and will open the DevTools:
-   if (isDev()) {
-    //  mainWindow.webContents.openDevTools();
-   } else {
-     //kimcy: 3초후에 사라지게 요청
-    setTimeout(function () {
-      mainWindow.minimize();
-      log.warn('MINIMIZE');
-    }, 3000);
+  if (isDev()) {
+    mainWindow.webContents.openDevTools();
+  } else {
+    //kimcy: 3초후에 사라지게 요청
+    if(firstInstall){
+      mainWindow.show();
+    }else{
+      mainWindow.hide();
+      log.warn('Hide main Window');
+    }
+    // setTimeout(function () {
+    //   mainWindow.minimize();
+    //   log.warn('MINIMIZE');
+    // }, 3000);
+  }
  
-   }
- 
-   app.on('before-quit', function (e) {
-     // Handle menu-item or keyboard shortcut quit here
-     if (isQuiting == true) {
-       log.warn('before-quit ===>QUIT', isQuiting);
-       mainWindow.destory();
-       if(mainWindow.isDestroyed()){
+  app.on('before-quit', function (e) {
+    // Handle menu-item or keyboard shortcut quit here
+    if (isQuiting == true) {
+      log.warn('before-quit ===>QUIT', isQuiting);
+      mainWindow.destory();
+      if(mainWindow.isDestroyed()){
         log.warn('before-quit 윈도우 종료 안됨');
-       }else{
+      }else{
         log.warn('before-quit 윈도우 종료 ');
-       }
-     } else {
-       log.warn('before-quit ==>HIDE', isQuiting);
-     }
-   });
+      }
+    } else {
+      log.warn('before-quit ==>HIDE', isQuiting);
+    }
+  });
  
-   mainWindow.on('close', function (e) {
-     log.warn('close ==> isQuiting?', isQuiting);
-     if(mainWindow.isDestroyed()){
+  mainWindow.on('close', function (e) {
+    log.warn('close ==> isQuiting?', isQuiting);
+    if(mainWindow.isDestroyed()){
       log.warn('close 윈도우 종료 안됨');
-     }else{
+    }else{
       log.warn('close 윈도우 종료 ');
-     }
-     if (isQuiting == true) {
-       return true;
-     } else {
-       mainWindow.hide();
-       e.preventDefault();  //여기서 이거 안하고 show 하면 문제 생김
-       return false;
-     }
-   });
+    }
+    if (isQuiting == true) {
+      return true;
+    } else {
+      mainWindow.hide();
+      e.preventDefault();  //여기서 이거 안하고 show 하면 문제 생김
+      return false;
+    }
+  });
  
-   mainWindow.onbeforeunload = function (e) {
+  mainWindow.onbeforeunload = function (e) {
     alert("onbeforeunload => 본 프로그램은 종료가 불가능합니다.")
     e.preventDefault();
     return false;
-   };
- 
-   
+  };
+    
    /*---------------------------------------------------------------
     Auto Updater
     ----------------------------------------------------------------*/
@@ -239,44 +240,43 @@ if (!gotTheLock) {
     }
   })
 
- app.on('ready', ()=> {
-  console.log('Ready');
+  app.on('ready', ()=> {
+    console.log('Ready');
 
-  if(fs.existsSync(initOptionPath)){
-    log.info('NOT First install');
-    createWindow();
-    createSBDatabBase();
-    initDataBackup();
-  }else{
-    localStorage.clear();
-    localStorage.removeItem('member');
-    log.info('First install');
-    let obj = {
-      'first':'YES'
-    };
-    fs.writeFile(initOptionPath, JSON.stringify(obj,null,2), function writeJSON(err) {
-      if (err) return log.error(err);
-    });
-    setTimeout(function(){
+    if(fs.existsSync(initOptionPath)){
+      log.info('NOT First install');
       createWindow();
       createSBDatabBase();
       initDataBackup();
-    },2000)
+    }else{
+      localStorage.clear();
+      localStorage.removeItem('member');
+      log.info('First install');
+      firstInstall = true;
+      let obj = {
+        'first':'YES'
+      };
+      fs.writeFile(initOptionPath, JSON.stringify(obj,null,2), function writeJSON(err) {
+        if (err) return log.error(err);
+      });
+      setTimeout(function(){
+        createWindow();
+        createSBDatabBase();
+        initDataBackup();
+      },2000)
+    }
 
-  }
-
-
-  if (!fs.existsSync(folderOption1Path)) {
-    let obj = {
-      'optionFor1Folder_IncludeSubFolder':'YES',
-      'optionFor2Folder_IncludeSubFolder':'YES',
-      'optionFor3Folder_IncludeSubFolder':'NO'
-    };
-    fs.writeFile(folderOption1Path, JSON.stringify(obj,null,2), function writeJSON(err) {
-      if (err) return log.error(err);
-    });
-  }
- });
+    if (!fs.existsSync(folderOption1Path)) {
+      let obj = {
+        'optionFor1Folder_IncludeSubFolder':'YES',
+        'optionFor2Folder_IncludeSubFolder':'YES',
+        'optionFor3Folder_IncludeSubFolder':'NO'
+      };
+      fs.writeFile(folderOption1Path, JSON.stringify(obj,null,2), function writeJSON(err) {
+        if (err) return log.error(err);
+      });
+    }
+  });
 }
 
 //kimcy: 인스턴스 여러개..
@@ -734,7 +734,6 @@ ipcMain.on("REQ-CHAINTREE", (event, arg) => {
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
  *  IPC : GET FILES
  -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
-
 ipcMain.on("GETFOLDERTREE", (event, arg) => {
   
   log.info('받음, GETFOLDERTREE, arg = ',arg);
@@ -907,6 +906,9 @@ var noBackupRead = function(member){
  *  IPC : PC RESOURCE
  -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 ipcMain.on('PCRESOURCE', (event, arg) => {
+
+  // mainWindow.minimize();
+  // log.warn('MINIMIZE main Window');
 
   console.log('받음 main, PCRESOURCE');
   let ipaddress;
@@ -1197,7 +1199,6 @@ var fileupload = function (arg){
     log.error('업로드 에러 : ',err);
    }
 }
-
 
 function handleSquirrelEvent(application) {
   if (process.argv.length === 1) {
