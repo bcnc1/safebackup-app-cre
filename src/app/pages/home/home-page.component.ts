@@ -400,7 +400,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
 
           this.uploading = false;
           //kimcy: test code
-          const minutes =  60 * getRandomInt(1, 4); 
+          const minutes =  60 * getRandomInt(5, 7); 
           const interval = 1000 * 60 * minutes;
           const next = moment().add(interval);
           
