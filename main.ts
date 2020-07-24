@@ -697,7 +697,7 @@ ipcMain.on("REQ-UPLOADTREE", (event, arg) => {
       });
       //log.info(' UPLOADTREE, 조회 결과  = ', results);
       if(mainWindow && !mainWindow.isDestroyed()){
-        log.info('보냄 UPLOADTREE, main ', results);
+        log.info('보냄 UPLOADTREE, main ');
         mainWindow.webContents.send("UPLOADTREE", {tree:results});
       }
     })
@@ -949,19 +949,31 @@ ipcMain.on('PCRESOURCE', (event, arg) => {
       macaddress = value;
       log.info('macaddress from localstorage');
     }
+    log.info('ipaddress = ',ipaddress);
+    log.info('macaddress = ',macaddress);
+  
+    if(mainWindow && !mainWindow.isDestroyed()){
+      log.info('보냄 main, PCRESOURCE',ipaddress,macaddress);
+      mainWindow.webContents.send("PCRESOURCE", {
+        ipaddresses: maps,
+        ipaddress: ipaddress,
+        macaddress: macaddress
+      });
+    }
+  
   });
 
-  log.info('ipaddress = ',ipaddress);
-  log.info('macaddress = ',macaddress);
+  // log.info('ipaddress = ',ipaddress);
+  // log.info('macaddress = ',macaddress);
 
-  if(mainWindow && !mainWindow.isDestroyed()){
-    log.info('보냄 main, PCRESOURCE');
-    mainWindow.webContents.send("PCRESOURCE", {
-      ipaddresses: maps,
-      ipaddress: ipaddress,
-      macaddress: macaddress
-    });
-  }
+  // if(mainWindow && !mainWindow.isDestroyed()){
+  //   log.info('보냄 main, PCRESOURCE');
+  //   mainWindow.webContents.send("PCRESOURCE", {
+  //     ipaddresses: maps,
+  //     ipaddress: ipaddress,
+  //     macaddress: macaddress
+  //   });
+  // }
 
 });
 

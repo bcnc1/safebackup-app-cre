@@ -46,10 +46,6 @@ export class UploadFiletreeService {
   private uploading = false;
   private notification = null;
 
-
-
-
-
   constructor(
     private memberAPI: M5MemberService,
     private postAPI: M5PostService,
@@ -60,7 +56,6 @@ export class UploadFiletreeService {
     //this.member = this.memberAPI.isLoggedin();
     this.member;
     console.log('dd..맴버 = ',this.member);
-
 
     this.notification = new Subject();
     //this.subject = new Subject();
@@ -546,24 +541,22 @@ export class UploadFiletreeService {
   }
 
   //스토리지에 저장된 폴더의 키를 반환한다.
-private getFolderKey(folderIndex) {
+  private getFolderKey(folderIndex) {
 
-  this.member = this.memberAPI.isLoggedin();
+    this.member = this.memberAPI.isLoggedin();
 
-  // console.log('getFolderKey => 맴버 ', this.member);
+    // console.log('getFolderKey => 맴버 ', this.member);
 
-  return 'folder:' + this.member.username + ':' + folderIndex;
-}
+    return 'folder:' + this.member.username + ':' + folderIndex;
+  }
 
-public setUploadingStatus(set){
-  this.uploading = set;
-}
+  public setUploadingStatus(set){
+    this.uploading = set;
+  }
 
-public setUploadMember(set){
-  this.member = set;
-}
-
-
+  public setUploadMember(set){
+    this.member = set;
+  }
 
   private gotoNext() {
     log.info('gotoNext , folderIndex = ', this.folderIndex);
