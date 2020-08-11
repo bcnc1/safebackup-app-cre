@@ -123,7 +123,7 @@ export class LoginPageComponent implements OnInit {
           member.nobackupdays = result[3];
           member.limitsize = result[4];
           member.currentsize = result[5];
-
+          log.info("member before stored = ", member);
           storage.set('member',member);
           storage.set('login',true);
           

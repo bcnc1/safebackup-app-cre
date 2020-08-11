@@ -47,6 +47,9 @@ var member;
 const zipper = require('zip-local');
 const STORAGE_URL = 'https://ssproxy.ucloudbiz.olleh.com/v1/AUTH_10b1107b-ce24-4cb4-a066-f46c53b474a3'
 
+let stopUploadFlag = false;
+let stopUploadInfo = new Object();
+
 if (handleSquirrelEvent(app)) {
   // squirrel event handled and app will exit in 1000ms, so don't do anything else
   // app.exit(0); 
@@ -92,7 +95,7 @@ function createWindow() {
     }
   ]);
 
-  tray.setToolTip('안심백업 v0.68.2');
+  tray.setToolTip('안심백업 v0.68.3');
   tray.setContextMenu(contextMenu);
 
   tray.on('click', function (e) {
@@ -222,6 +225,30 @@ function createWindow() {
       // });
     // });
 
+}
+
+function creatWarnWindow() {
+  const win = new BrowserWindow({ 
+    width: 400, 
+    height: 300,
+    webPreferences: {
+      nodeIntegration: true,
+      webSecurity: false
+    },
+    autoHideMenuBar: true
+  })
+
+  win.loadURL(
+    url.format({
+      pathname: path.join(__dirname, `/dist/assets/warn.html`),
+      protocol: "file:",
+      slashes: true
+    })
+  );
+}
+
+function showMainWindow(){
+  mainWindow.show();
 }
 
 try {
@@ -749,21 +776,26 @@ ipcMain.on("GETFOLDERTREE", (event, arg) => {
     createNPKIzip(arg.path, arg.username);
   }
 
-  addFileFromDir(arg, mainWindow, (result)=>{
-    log.info('폴더 트리 결과 = ',result);
-    localStorage.getItem('member').then((value) => {
-      //log.info('로그아웃 => ', value);
-      if(value == null){
-        return;
+  if(stopUploadFlag){
+    log.error('클라우드 용량초과로 파일검색 중지');
+    showMainWindow();
+    mainWindow.webContents.send("STOP-GET-FOLDER-TREE", {limitsize:stopUploadInfo['limitsize'], currentsize:stopUploadInfo['currentsize']});
+  }else{
+    addFileFromDir(arg, mainWindow, (result)=>{
+      log.info('폴더 트리 결과 = ',result);
+      localStorage.getItem('member').then((value) => {
+        //log.info('로그아웃 => ', value);
+        if(value == null){
+          return;
+        }
+      });
+
+      if(mainWindow && !mainWindow.isDestroyed()){
+        log.info('GETFOLDERTREE => 전송 ');
+        mainWindow.webContents.send("GETFOLDERTREE", "Complete Scanning Folder");
       }
     });
-
-
-    if(mainWindow && !mainWindow.isDestroyed()){
-      log.info('GETFOLDERTREE => 전송 ');
-      mainWindow.webContents.send("GETFOLDERTREE", "Complete Scanning Folder");
-    }
-  });
+  }
  
 });
 
@@ -909,6 +941,25 @@ ipcMain.on('PCRESOURCE', (event, arg) => {
 
   // mainWindow.minimize();
   // log.warn('MINIMIZE main Window');
+
+  // === START : after comparing cloud limit and size, show a window of warning
+  localStorage.getItem('member').then((value) => {
+    member = JSON.parse(value);
+
+    let limitsize = Number(member.limitsize);
+    let currentsize = Number(member.currentsize);
+    log.info('cloud size', limitsize, currentsize);
+    limitsize = limitsize * 1024 * 1024 * 1024;
+    if(currentsize >= limitsize){
+      creatWarnWindow();
+      stopUploadFlag = true;
+      stopUploadInfo['limitsize'] = limitsize;
+      stopUploadInfo['currentsize'] = currentsize;
+    }
+
+   });
+  // === END : after comparing cloud limit and size, show a window of warning
+
 
   console.log('받음 main, PCRESOURCE');
   let ipaddress;

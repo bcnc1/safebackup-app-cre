@@ -115,6 +115,25 @@ export class UploadFiletreeService {
 
      });
 
+    /*----------------------------------------------------
+       *  IPC Response : STOP GET FOLDER TREE
+          클라우드 허용용량을 초과한 경우  
+       ----------------------------------------------------*/
+      this.electronService.ipcRenderer.on('STOP-GET-FOLDER-TREE', (event: Electron.IpcMessageEvent, response: any) => {
+        let limitsize = response.limitsize;
+        let currentsize = response.currentsize;
+        
+        this.notification.next({
+          cmd: 'LOG',
+          message: '현재 사용량은 ' + currentsize + 'bytes (허용 용량:'+limitsize+'bytes) 입니다. 허용량 초과로 더이상 동작하지 않습니다'
+        });
+        this.notification.next({
+          cmd: 'LOG',
+          message: '관리업체로 문의하시기 바랍니다.'
+        });
+
+      });
+
      /*----------------------------------------------------
        *  IPC Response : Get CHAINTREE
        
