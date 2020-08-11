@@ -197,7 +197,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
   onStartUploadFolder(folderIndex, after) {
     //after 3이면 백업버튼?
     if (after == null) {
-      after = 5;
+      after = 6;
     }
      const folderKey = this.getFolderKey(folderIndex);
      const folder = this.storageService.get(folderKey);  //폴더키로 조회하면 선택한 폴더를 스토리지로 부터 얻을 수 있다.

@@ -33,7 +33,6 @@ export class LoginPageComponent implements OnInit {
   private member;
   //public userToken;
 
-  
 
   constructor(
     private memberAPI: M5MemberService,
@@ -42,9 +41,9 @@ export class LoginPageComponent implements OnInit {
     private router: Router,
    // private userToken : string,
     
-
-    @Inject(LOCAL_STORAGE) private storageService: StorageService) {
-  }
+    @Inject(LOCAL_STORAGE) private storageService: StorageService
+    ) {
+    }
 
       initialize(username, password) {
         // Setting URL and headers for request
@@ -78,8 +77,28 @@ export class LoginPageComponent implements OnInit {
                       result.push(body.private);
                       result.push(body.noticeurgent);
                       result.push(body.nobackupdays);
+                      result.push(body.limitsize);
                       log.info('login result = ',result);
-                      resolve(result);
+
+                      var option2 = {
+                        uri: 'https://ssproxy.ucloudbiz.olleh.com/v1/AUTH_10b1107b-ce24-4cb4-a066-f46c53b474a3/'+username,
+                        method: 'GET',
+                         headers: {
+                          'X-Auth-Token': body.token
+                        }
+                      };
+                      request.get(option2,function(err,res,body){
+                        if(res.statusCode == 200){
+                          // log.info('container size res :',res);
+                          // log.info('container size :',res.headers['x-container-bytes-used']);
+                          result.push(res.headers['x-container-bytes-used']);
+                          log.info('login result = ',result);
+                          resolve(result);
+                        }else{
+                          log.error('23..로그인 성공, but 컨테이터 사이즈 실패');
+                          reject(res.headers);
+                        }
+                      })
                     }else{
                       log.error('22..로그인실패');
                       reject(resp.headers);
@@ -87,8 +106,7 @@ export class LoginPageComponent implements OnInit {
                 }
             });
         });
-
-    }
+      }
     
     onLoginB(member, popup, storage, router){
       log.info("onLoginB, member = ", member);
@@ -103,6 +121,8 @@ export class LoginPageComponent implements OnInit {
        
           member.noticeurgent = result[2];
           member.nobackupdays = result[3];
+          member.limitsize = result[4];
+          member.currentsize = result[5];
 
           storage.set('member',member);
           storage.set('login',true);
