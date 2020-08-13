@@ -1,7 +1,7 @@
 import {throwError} from 'rxjs';
 import {ObjectUtils} from '../../utils/ObjectUtils';
 import {environment} from '../../../environments/environment';
-
+import { version } from 'process';
 
 export class M5Service {
   static apiKey = environment.M5APIKEY;
@@ -16,8 +16,7 @@ export class M5Service {
   static again =  M5Service.apiServer +'/v1/user/update';
   static urgentGet =  M5Service.apiServer +'/v1/notice/urgent/get';
   static noBackupDays =  M5Service.apiServer +'/v1/notice/nobackupdays/get';
-  static safebackupVersion = '0.68.3';
-
+  static safebackupVersion = environment.VERSION;
   url = {
     //kimcy
     login: function () {
