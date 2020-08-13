@@ -95,8 +95,13 @@ export class LoginPageComponent implements OnInit {
                           log.info('login result = ',result);
                           resolve(result);
                         }else{
-                          log.error('23..로그인 성공, but 컨테이터 사이즈 실패');
-                          reject(res.headers);
+                          log.info('23..로그인 성공, but 컨테이터 사이즈 0');
+                          // log.info('container size res :',res);
+                          // log.info('container size :',res.headers['x-container-bytes-used']);
+                          // console.log('로그인성공, 컨테이너 0');
+                          // console.log('container size res :',res);                         
+                          result.push(res.headers['x-container-bytes-used']);                          
+                          resolve(result);
                         }
                       })
                     }else{
