@@ -95,7 +95,7 @@ function createWindow() {
     }
   ]);
 
-  tray.setToolTip('안심백업 v0.68.3');
+  tray.setToolTip(environment.VERSION);
   tray.setContextMenu(contextMenu);
 
   tray.on('click', function (e) {
