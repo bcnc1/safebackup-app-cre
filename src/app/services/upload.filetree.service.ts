@@ -120,12 +120,18 @@ export class UploadFiletreeService {
           클라우드 허용용량을 초과한 경우  
        ----------------------------------------------------*/
       this.electronService.ipcRenderer.on('STOP-GET-FOLDER-TREE', (event: Electron.IpcMessageEvent, response: any) => {
+        function AddComma(num){
+        var regexp = /\B(?=(\d{3})+(?!\d))/g;
+        return num.toString().replace(regexp, ',');
+        }
+
         let limitsize = response.limitsize;
         let currentsize = response.currentsize;
-        
+        let limitsizeComma = AddComma(limitsize);
+        let currentsizeComma = AddComma(currentsize);
         this.notification.next({
           cmd: 'LOG',
-          message: '현재 사용량은 ' + currentsize + 'bytes (허용 용량:'+limitsize+'bytes) 입니다. 허용량 초과로 더이상 동작하지 않습니다'
+          message: '현재 사용량은 ' +currentsizeComma+ 'bytes (허용 용량:'+limitsizeComma+'bytes) 입니다. 허용량 초과로 더이상 동작하지 않습니다'
         });
         this.notification.next({
           cmd: 'LOG',
