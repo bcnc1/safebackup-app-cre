@@ -16,7 +16,7 @@ export class M5Service {
   static again =  M5Service.apiServer +'/v1/user/update';
   static urgentGet =  M5Service.apiServer +'/v1/notice/urgent/get';
   static noBackupDays =  M5Service.apiServer +'/v1/notice/nobackupdays/get';
-  static safebackupVersion = '3.3.1';
+  static safebackupVersion = '0.68.3';
 
   url = {
     //kimcy
