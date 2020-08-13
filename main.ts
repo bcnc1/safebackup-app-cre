@@ -24,7 +24,7 @@ const dialog = electron.dialog;
 const log = require('electron-log');
 const updater = require('electron-simple-updater');
 // const { autoUpdater } = require("electron-updater")
-
+const SF_json = require('./package.json');
 //kimcy
 const reqestProm = require('request-promise-native')
 var AutoLaunch = require('auto-launch');
@@ -92,7 +92,7 @@ function createWindow() {
     }
   ]);
 
-  tray.setToolTip('0.68.4');
+  tray.setToolTip(SF_json.version);
   tray.setContextMenu(contextMenu);
 
   tray.on('click', function (e) {
