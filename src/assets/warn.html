@@ -6,8 +6,15 @@
   <script>document.write('<base href="' + document.location + '" />');</script>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
-<body>
-    현재 귀하가 사용중인 계정의 클라우드 공간이 허용량을 초과하였습니다.<br>
-    관리자에게 연락하여 조치하시기 바랍니다.
+  <body onresize="parent.resizeTo(400,340)" onload="parent.resizeTo(400,340)" scroll="no">
+    <img src="warn.png" style="display: block; margin: 0px auto;">
 </body>
 </html> 
+
+<style>
+  body {
+       margin:0;
+       padding:0;
+       overflow: hidden;
+       }
+</style>

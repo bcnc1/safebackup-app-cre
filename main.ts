@@ -7,12 +7,10 @@ import { createInjectable } from "@angular/compiler/src/core";
 import { userInfo } from "os";
 import { LoggerConfig } from "ngx-logger";
 import * as moment from 'moment';
-
 const {app, BrowserWindow, ipcMain} = require("electron");
 const fs = require("fs");
 const url = require("url");
 const os = require("os");
-
 const path = require("path");
 
 const { localStorage, sessionStorage } = require('electron-browser-storage');
@@ -34,7 +32,6 @@ const chokidar = require('chokidar');
 
 let isQuiting = false;
 var isOpenDialog = false;
-
 var knex = require('knex')({
   client: 'sqlite3',
   connection: {
@@ -95,7 +92,7 @@ function createWindow() {
     }
   ]);
 
-  tray.setToolTip(environment.VERSION);
+  tray.setToolTip('0.68.4');
   tray.setContextMenu(contextMenu);
 
   tray.on('click', function (e) {
