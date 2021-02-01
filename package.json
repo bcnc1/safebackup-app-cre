@@ -1,9 +1,9 @@
 {
-  "name": "SafeBackup",
-  "productName": "SafeBackup",
-  "publishedName": "BC&Company",
-  "version": "0.68.4",
-  "description": "SafeBackup with KT Cloud",
+  "name": "CreSotiBackup",
+  "productName": "CreSotiBackup",
+  "publishedName": "CreSoti with BC&Company",
+  "version": "0.0.1",
+  "description": "CreSotiBackup with KT Cloud",
   "author": {
     "name": "BC&Company",
     "email": "bcncompany1@gmail.com"
