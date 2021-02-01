@@ -175,7 +175,7 @@ export class LoginPageComponent implements OnInit {
 
   ngOnInit(): void {
     
-    console.log('loginin ngOnInit, 여기가 시작인듯');
+    // console.log('loginin ngOnInit, 여기가 시작인듯');
     this.loggingin = false;
 
     /*---------------------------------------------------------------
