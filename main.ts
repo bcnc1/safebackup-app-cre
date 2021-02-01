@@ -965,6 +965,9 @@ ipcMain.on('PCRESOURCE', (event, arg) => {
   var interfaces = os.networkInterfaces();
   log.info('interfaces = ',interfaces);
 
+  let hostName = os.hostname();
+  log.info('hostName =>',hostName);
+
   var maps = Object.keys(interfaces)
     .map(x => interfaces[x].filter(x => x.family === 'IPv4' && !x.internal)[0])
     .filter(x => x);
@@ -972,7 +975,8 @@ ipcMain.on('PCRESOURCE', (event, arg) => {
   log.info('maps =>',maps);
   if(maps != null) {
     ipaddress = maps[0].address;
-    macaddress = maps[0].mac;
+    // macaddress = maps[0].mac;
+    macaddress = hostName;
   }
 
   localStorage.getItem('ipaddress').then((value) => {
@@ -988,17 +992,17 @@ ipcMain.on('PCRESOURCE', (event, arg) => {
   });
 
   localStorage.getItem('macaddress').then((value) => {
-    log.info('macaddress in localstorage => ', value);
+    log.info('hostName in localstorage => ', value);
     if(value == undefined || value == null){
       localStorage.setItem('macaddress',macaddress).then(()=>{
-        log.info(macaddress,'macaddress localstorage 저장');
+        log.info(macaddress,'hostName localstorage 저장');
       });
     }else{
       macaddress = value;
-      log.info('macaddress from localstorage');
+      log.info('hostName from localstorage');
     }
     log.info('ipaddress = ',ipaddress);
-    log.info('macaddress = ',macaddress);
+    log.info('hostName = ',macaddress);
   
     if(mainWindow && !mainWindow.isDestroyed()){
       log.info('보냄 main, PCRESOURCE',ipaddress,macaddress);
@@ -1011,42 +1015,8 @@ ipcMain.on('PCRESOURCE', (event, arg) => {
   
   });
 
-  // log.info('ipaddress = ',ipaddress);
-  // log.info('macaddress = ',macaddress);
-
-  // if(mainWindow && !mainWindow.isDestroyed()){
-  //   log.info('보냄 main, PCRESOURCE');
-  //   mainWindow.webContents.send("PCRESOURCE", {
-  //     ipaddresses: maps,
-  //     ipaddress: ipaddress,
-  //     macaddress: macaddress
-  //   });
-  // }
-
 });
 
-/*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
- *  IPC : get A FOLDER size
- *  
- -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
-//  ipcMain.on('REQ-DIRSIZE', (event, arg) => {
-//   var tableName = arg.username +':'+arg.folderIndex;
-//   knex(tableName).sum('filesize')
-//   .then((result)=>{
-//     log.info('폴더사이즈 , folderIndex =  ',arg.folderIndex, 'size = ', result);
-//     //console.log('사이즈 = ', result.sum(`filesize`));
-//     //console.log('사이즈 = ', result[0]['sum(`filesize`)']);
-//     mainWindow.webContents.send("DIRSIZE", {
-//       error: null,
-//       folderIndex: arg.folderIndex,
-//       dirsize: result[0]['sum(`filesize`)']
-//     });
-//   });
-//  });
-/*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
- *  IPC : SELECT A FOLDER
- *  폴더 선택 이벤트 처리
- -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 ipcMain.on('SELECTFOLDER', (event, arg) => {
   console.log('받음,main, SELECTFOLDER');
   var directory = dialog.showOpenDialog(mainWindow, {
