@@ -1,9 +1,9 @@
 {
-  "name": "CreSotiBackup",
-  "productName": "CreSotiBackup",
-  "publishedName": "CreSoti with BC&Company",
+  "name": "CreSotyBackup",
+  "productName": "CreSotyBackup",
+  "publishedName": "CreSoty with BC&Company",
   "version": "0.0.1",
-  "description": "CreSotiBackup with KT Cloud",
+  "description": "CreSotyBackup with KT Cloud",
   "author": {
     "name": "BC&Company",
     "email": "bcncompany1@gmail.com"
@@ -121,7 +121,7 @@
     "jquery": "^3.4.1",
     "knex": "^0.19.4",
     "moment": "^2.24.0",
-    "ngx-bootstrap": "^5.0.0",
+    "ngx-bootstrap": "5.0.0",
     "ngx-electron": "^2.1.1",
     "ngx-logger": "^3.3.12",
     "ngx-webstorage-service": "^4.0.1",

@@ -1,6 +1,6 @@
 {
- "productName": "CreSotiBackup",
- "appId": "com.doctorkeeper.cresotibackup",
+ "productName": "CreSotyBackup",
+ "appId": "com.doctorkeeper.cresotybackup",
   "directories": {
     "buildResources":"build/",
     "output": "release/"

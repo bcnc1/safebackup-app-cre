@@ -56,7 +56,7 @@ if (handleSquirrelEvent(app)) {
 let mainWindow;
 
 var drBackupAutoLauncher = new AutoLaunch({
-  name: 'safebackup'
+  name: 'creSotybackup'
 });
 drBackupAutoLauncher.enable();
 
@@ -64,8 +64,8 @@ drBackupAutoLauncher.enable();
 let tray = null;
 let contextMenu = null;
 
-let folderOption1Path = "c:\\cresoti_backup\\option1.json";
-let initOptionPath = "c:\\cresoti_backup\\init.json";
+let folderOption1Path = "c:\\cresoty_backup\\option1.json";
+let initOptionPath = "c:\\cresoty_backup\\init.json";
 
 let firstInstall = false;
 
