@@ -1,6 +1,6 @@
 {
- "productName": "SafeBackup",
- "appId": "com.doctorkeeper.safebackup.dentop",
+ "productName": "CreSotiBackup",
+ "appId": "com.doctorkeeper.cresotibackup",
   "directories": {
     "buildResources":"build/",
     "output": "release/"

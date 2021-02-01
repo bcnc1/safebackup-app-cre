@@ -64,8 +64,8 @@ drBackupAutoLauncher.enable();
 let tray = null;
 let contextMenu = null;
 
-let folderOption1Path = "c:\\safebackup\\option1.json";
-let initOptionPath = "c:\\safebackup\\init.json";
+let folderOption1Path = "c:\\cresoti_backup\\option1.json";
+let initOptionPath = "c:\\cresoti_backup\\init.json";
 
 let firstInstall = false;
 
@@ -1083,28 +1083,27 @@ ipcMain.on('SELECTFOLDER', (event, arg) => {
  *  chain upload
  -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 var chainupload = function (arg){
-   console.log('블록체인 기록을 위한 api');
+  console.log('블록체인 기록을 위한 api');
   let method, url;
 
   //chain-error: 파일업로드는 됬지만 블록체인에 기록되지 않은 상태.
-  if(arg.uploadtype == 'chain-create' || arg.uploadtype == 'chain-error'){
-    console.log('chain-create/ chain-error');
-      method = 'POST';
-      url = 'http://211.252.85.59:3000/api/v1/proof/create'; //env.CREATE;
-      //url = env.CREATE_DEV; //개발용
-  }else{
-    method = 'PUT';
-    url = 'http://211.252.85.59:3000/api/v1/proof/update'; //env.UPDATE;
-    //url = env.UPDATE_DEV;
-  }
-
-  log.info('chainupload, arg = ',arg);
+  // if(arg.uploadtype == 'chain-create' || arg.uploadtype == 'chain-error'){
+  //   console.log('chain-create/ chain-error');
+  //     method = 'POST';
+  //     url = 'http://211.252.85.59:3000/api/v1/proof/create'; //env.CREATE;
+  //     //url = env.CREATE_DEV; //개발용
+  // }else{
+  //   method = 'PUT';
+  //   url = 'http://211.252.85.59:3000/api/v1/proof/update'; //env.UPDATE;
+  //   //url = env.UPDATE_DEV;
+  // }
+  // log.info('chainupload, arg = ',arg);
   let tableName = arg.tablename;
 
   function chainuploadCb(error, response, body) {
 
-    if (!error && response.statusCode == 200) {
-      log.info('체인코드 업데이트 성공');
+    // if (!error && response.statusCode == 200) {
+    //   log.info('체인코드 업데이트 성공');
 
       knex(tableName)
         .where({id: arg.fileid})
@@ -1118,20 +1117,19 @@ var chainupload = function (arg){
           });
         });
       
-    }else{
-       log.error('chain응답 실패 = ',error, 'info = ',arg); 
-       //log.error('tableName = ',tableName);
-       knex(tableName)
-        .where({id: arg.fileid})
-        .update({uploadstatus: 1, chainstatus: 2})  
-        .then(()=>{
-          //console.log('arg.uploadtype = ',arg.uploadtype);
-          if (mainWindow && !mainWindow.isDestroyed()){
-            mainWindow.webContents.send(arg.uploadtype, {error: "chain-error", body:body});
-          }
-        });
-
-    }
+    // }else{
+    //    log.error('chain응답 실패 = ',error, 'info = ',arg); 
+    //    //log.error('tableName = ',tableName);
+    //    knex(tableName)
+    //     .where({id: arg.fileid})
+    //     .update({uploadstatus: 1, chainstatus: 2})  
+    //     .then(()=>{
+    //       //console.log('arg.uploadtype = ',arg.uploadtype);
+    //       if (mainWindow && !mainWindow.isDestroyed()){
+    //         mainWindow.webContents.send(arg.uploadtype, {error: "chain-error", body:body});
+    //       }
+    //     });
+    // }
   }
 
   var options = {  
