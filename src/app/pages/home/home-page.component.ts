@@ -53,6 +53,8 @@ export class HomePageComponent implements OnInit, OnDestroy {
   private timergetTree;
   private timerStart;
 
+// City Names
+  public City: any = ['Florida', 'South Dakota', 'Tennessee', 'Michigan']
 
   constructor(
     private memberAPI: M5MemberService,
@@ -69,15 +71,20 @@ export class HomePageComponent implements OnInit, OnDestroy {
 
   private getFolderKey(folderIndex) {  //폴더+사용자이름+폴더index 붙여서 return
    // log.info('home-page, getFolderKey => folderIndex ',folderIndex, this.member.username);
-
     this.member = this.memberAPI.isLoggedin();
-
     const key = 'folder:' + this.member.username + ':' + folderIndex;
-
    // log.info('FOLDERKEY', key, 'username = ' + this.member.username)
     return key;
   }
 
+    // Choose city using select dropdown
+    changeCity(e) {
+      console.log('1',e.value)
+      console.log('2',e.target.value)
+      // this.cityName.setValue(e.target.value, {
+      //   onlySelf: true
+      // })
+    }
 
   onLogout() {
     //console.log('로그아웃버튼 눌림');
