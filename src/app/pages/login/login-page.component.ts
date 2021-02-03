@@ -116,7 +116,7 @@ export class LoginPageComponent implements OnInit {
     
   onLoginB(member, popup, storage, router){
     log.info("onLoginB, member = ", member);
-    if(member.program == null || member.program == undefined){
+    if(member.program == null || member.program == undefined || member.program == ""){
       storage.remove(member);
       let options = {
         message: '아이디, 비밀번호, 프로그램을 확인하세요'
