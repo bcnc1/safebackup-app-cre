@@ -53,8 +53,6 @@ export class HomePageComponent implements OnInit, OnDestroy {
   private timergetTree;
   private timerStart;
 
-// City Names
-  public City: any = ['Florida', 'South Dakota', 'Tennessee', 'Michigan']
 
   constructor(
     private memberAPI: M5MemberService,
@@ -76,15 +74,6 @@ export class HomePageComponent implements OnInit, OnDestroy {
    // log.info('FOLDERKEY', key, 'username = ' + this.member.username)
     return key;
   }
-
-    // Choose city using select dropdown
-    changeCity(e) {
-      console.log('1',e.value)
-      console.log('2',e.target.value)
-      // this.cityName.setValue(e.target.value, {
-      //   onlySelf: true
-      // })
-    }
 
   onLogout() {
     //console.log('로그아웃버튼 눌림');

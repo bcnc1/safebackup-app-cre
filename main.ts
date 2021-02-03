@@ -953,8 +953,8 @@ ipcMain.on('PCRESOURCE', (event, arg) => {
       stopUploadInfo['limitsize'] = limitsize;
       stopUploadInfo['currentsize'] = currentsize;
     }
-
-   });
+    log.info('PCRESOURCE > member',member);
+  });
   // === END : after comparing cloud limit and size, show a window of warning
 
 

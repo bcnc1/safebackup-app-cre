@@ -14,17 +14,11 @@
         *ngIf="memberPrivate" display="none" style="display: none;">
         백업관리
       </button> -->
-      <button type="submit" class="btn btn-primary btn-sm" (click)="onLogout()">
-        프로그램
-      </button>
-      <select class="btn btn-secondary btn-sm" (change)="changeCity($event)">
-        <option value="">Choose your city</option>
-        <option *ngFor="let city of City" [ngValue]="city">{{city}}</option>
-     </select>
       <button type="submit" class="btn btn-danger btn-sm" style="margin-right:5px;" (click)="onRetryUpload()">
         백업시작
       </button>
-      <button type="submit" class="btn btn-primary btn-sm" (click)="onLogout()" style="display: none;">
+      <!-- <button type="submit" class="btn btn-primary btn-sm" (click)="onLogout()" style="display: none;"> -->
+      <button type="submit" class="btn btn-primary btn-sm" (click)="onLogout()" style="">
         로그아웃
       </button>
     </div>

@@ -2,27 +2,35 @@
   <img src="assets/images/logo1.png" style="display:block;margin:auto;">
 </div> -->
 
-<div class="card mt-5" style="margin:auto;width:60%;">
+<div class="card mt-3" style="margin:auto;width:60%;">
   <div class="card-body">
     <!-- <h5 class="card-title">로그인</h5> -->
     <img src="assets/images/logo1.png" style="display:block;margin:auto;">
 
     <div class="form-group">
-      <label for="username">아이디</label>
-
+      <!-- <label for="username">아이디</label> -->
       <input type="text" class="form-control" id="email" placeholder="아이디를 입력하세요" [(ngModel)]="username">
     </div>
     <div class="form-group">
-      <label for="email">비밀번호</label>
+      <!-- <label for="email">비밀번호</label> -->
       <input type="password" class="form-control" id="password" placeholder="비밀번호를 입력하세요" [(ngModel)]="password">
+    </div>
+    <div class="form-group">
+      <select class="form-control" id="program" [(ngModel)]="program">
+        <option value="" disabled selected="true">약국 프로그램 선택</option>
+        <option value="pharm_3000">팜IT3000</option>
+        <option value="u_pharm">유팜</option>
+        <option value="e_pharm">이팜</option>
+        <option value="on_pharm">온팜</option>
+        <option value="ns_pharm">NS팜</option>
+        <option value="cn_pharm">CN팜</option>
+        <!-- <option *ngFor="let prog of Programs">{{prog}}</option> -->
+      </select>
     </div>
     <div *ngIf="migrating==false">
       <!--<button type="button" class="btn btn-primary" *ngIf="loggingin==true">로그인중입니다.</button>&nbsp;-->
       <button type="button" class="btn btn-primary"  (click)="onLogin()">로그인</button>&nbsp;
       <!--<button type="button" class="btn btn-primary btn-secondary" (click)="onSignup()">회원가입</button>-->
-    </div>
-    <div *ngIf="migrating==true">
-      구버전의 데이터를 마이그레이션 중 입니다...
     </div>
   </div>
 </div>
