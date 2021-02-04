@@ -6,7 +6,7 @@
 
   <div class="row">
     <div class="col-sm">
-      아이디 : {{member.username}}
+      {{member.username}} / {{pharmProgram}}
     </div>
 
     <div class="col-sm pull-right  text-right">
@@ -18,7 +18,7 @@
         백업시작
       </button>
       <!-- <button type="submit" class="btn btn-primary btn-sm" (click)="onLogout()" style="display: none;"> -->
-      <button type="submit" class="btn btn-primary btn-sm" (click)="onLogout()" style="">
+      <button type="submit" class="btn btn-primary btn-sm" (click)="onLogout()">
         로그아웃
       </button>
     </div>
@@ -29,7 +29,71 @@
 <div class="container">
 
   <div>
-    <tabset>
+
+    <div>
+      <table class="table table-sm mt-3">
+        <tbody>
+          <tr>
+            <td width="15%">백업폴더</td>
+            <td width="65%">          
+              <span *ngIf="showingFolderName0!==undefined && showingFolderName0.length!=0">
+                <span *ngIf="rootFolderData!=null && rootFolderData.userData.errorMessage!=null"
+                  class="badge badge-danger badge-pill">
+                  {{rootFolderData.userData.errorMessage}}
+                </span>
+                {{showingFolderName0}}
+              </span>
+              <span *ngIf="showingFolderName0.length==0">백업할 폴더를 선택하세요</span>
+            <td width="20%">
+              <button type="button" class="btn btn-default btn-sm" (click)="onChangeFolder(0)">폴더선택
+              </button>
+              <button type="button" class="btn btn-default btn-sm" (click)="onNullifyFolder(0)">리셋
+              </button>
+            </td>
+          </tr>
+          <tr>
+            <td>인증서</td>
+            <td>
+              <span *ngIf="showingFolderName1!==undefined && showingFolderName1.length!=0">
+                <span *ngIf="rootFolderData!=null && rootFolderData.userData.errorMessage!=null"
+                  class="badge badge-danger badge-pill">
+                  {{rootFolderData.userData.errorMessage}}
+                </span>
+                {{showingFolderName1}}
+              </span>
+              <span *ngIf="showingFolderName1.length==0">백업할 폴더를 선택하세요</span>
+            </td>
+            <td>
+              <button type="button" class="btn btn-default btn-sm" (click)="onChangeFolder(1)">폴더선택
+              </button>
+              <button type="button" class="btn btn-default btn-sm" (click)="onNullifyFolder(1)">리셋
+              </button>
+            </td>
+          </tr>
+          <tr>
+            <td>개인폴더</td>
+            <td>
+              <span *ngIf="showingFolderName2!==undefined && showingFolderName2.length!=0">
+                <span *ngIf="rootFolderData!=null && rootFolderData.userData.errorMessage!=null"
+                  class="badge badge-danger badge-pill">
+                  {{rootFolderData.userData.errorMessage}}
+                </span>
+                {{showingFolderName2}}
+              </span>
+              <span *ngIf="showingFolderName2.length==0">백업할 폴더를 선택하세요</span>
+            </td>
+            <td>
+              <button type="button" class="btn btn-default btn-sm" (click)="onChangeFolder(2)">폴더선택
+              </button>
+              <button type="button" class="btn btn-default btn-sm" (click)="onNullifyFolder(2)">리셋
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <tabset style="display: none;">
       <tab (selectTab)="onTab(0)" *ngIf="!memberPrivate">
         <ng-template tabHeading>
           폴더1
@@ -82,7 +146,7 @@
     </tabset>
 
 
-    <div class="container mt-2" style="margin-bottom:100px">
+    <div class="container mt-2" style="display:none;margin-bottom:50px">
       <div class="alert alert-dark  d-flex justify-content-between align-items-center" role="alert"
         style="height:50px;font-size:12px;">
         <div>
@@ -100,19 +164,19 @@
             *ngIf="selectedFolderIndex==0">폴더선택
           </button>
           <button type="button" class="btn btn-light btn-sm" (click)="onNullifyFolder(0)"
-            *ngIf="selectedFolderIndex==0">해지
+            *ngIf="selectedFolderIndex==0">Reset
           </button>
           <button type="button" class="btn btn-secondary btn-sm" (click)="onChangeFolder(1)"
             *ngIf="selectedFolderIndex==1">폴더선택
           </button>
           <button type="button" class="btn btn-light btn-sm" (click)="onNullifyFolder(1)"
-            *ngIf="selectedFolderIndex==1">해지
+            *ngIf="selectedFolderIndex==1">Reset
           </button>
           <button type="button" class="btn btn-secondary btn-sm" (click)="onChangeFolder(2)"
             *ngIf="selectedFolderIndex==2">폴더선택
           </button>
           <button type="button" class="btn btn-light btn-sm" (click)="onNullifyFolder(2)"
-            *ngIf="selectedFolderIndex==2">해지
+            *ngIf="selectedFolderIndex==2">Reset
           </button>
         </div>
 

@@ -42,7 +42,12 @@ export class HomePageComponent implements OnInit, OnDestroy {
   private foldersSize; 
   private storedFolders = {};
   public selectedFolderIndex = 0;
+  
   public showingFolderName;
+  public showingFolderName0;
+  public showingFolderName1;
+  public showingFolderName2;
+
   public showingFileList = [];
   public showingFolderList = [];
 
@@ -53,6 +58,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
   private timergetTree;
   private timerStart;
 
+  public pharmProgram = "";
 
   constructor(
     private memberAPI: M5MemberService,
@@ -128,7 +134,6 @@ export class HomePageComponent implements OnInit, OnDestroy {
       username: this.member.username
     });
     this.storageService.set('login',false);
-
   }
 
   onNullifyFolder(folderIndex) {
@@ -143,6 +148,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
     //   username: this.member.username
     // });
     // this.storageService.set('login',false);
+    this.ReadFolderInfo();
   }
 
 
@@ -297,17 +303,46 @@ export class HomePageComponent implements OnInit, OnDestroy {
     clearTimeout(this.timerStart);
   }
 
+  ReadFolderInfo(){
+    this.showingFolderName0 = (this.storageService.get(this.getFolderKey(0)) == undefined ?'': this.storageService.get(this.getFolderKey(0)));
+    this.showingFolderName1 = (this.storageService.get(this.getFolderKey(1)) == undefined ?'': this.storageService.get(this.getFolderKey(1)));
+    this.showingFolderName2 = (this.storageService.get(this.getFolderKey(2)) == undefined ?'': this.storageService.get(this.getFolderKey(2)));
+    // location.reload();
+  }
+
   ngOnInit() {
    // console.log('home-page, ngOnInit');
     this.version = environment.VERSION;
     this.electronService.ipcRenderer.send('PCRESOURCE', null);
     console.log('보냄 home-page, PCRESOURCE');
-
     
     this.member = this.memberAPI.isLoggedin();
     this.memberPrivate = this.member.private;
 
     //console.log('memberPrivate = ', this.memberPrivate);
+    this.pharmProgram = this.member.program;
+    switch(this.pharmProgram) {
+      case "pharm_3000":
+        this.pharmProgram = "팜IT3000";
+        break;
+      case "u_pharm":
+        this.pharmProgram = "유팜";
+        break;
+      case "e_pharm":
+        this.pharmProgram = "이팜";
+        break;
+      case "on_pharm":
+        this.pharmProgram = "온팜";
+        break;
+      case "ns_pharm":
+        this.pharmProgram = "NS팜";
+        break;
+      case "cn_pharm":
+        this.pharmProgram = "CN팜";
+        break;
+      default:
+        this.pharmProgram = "";
+    }
 
     if(this.memberPrivate){
       this.maxFolder = this.PRIVATE_FLENGTH;
@@ -559,7 +594,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
           this.onStartUploadFolder(response.folderIndex, 3);  //3초후에 업로드
         }
       }
-
+      this.ReadFolderInfo();
     });
 
 
@@ -568,6 +603,9 @@ export class HomePageComponent implements OnInit, OnDestroy {
            (초기 목록 보여주기 용)
      ----------------------------------------------------------------*/
     this.onTab(0);
+
+    this.ReadFolderInfo();
+
   }
 
 }
