@@ -44,6 +44,7 @@ var member;
 const zipper = require('zip-local');
 const STORAGE_URL = 'https://ssproxy.ucloudbiz.olleh.com/v1/AUTH_10b1107b-ce24-4cb4-a066-f46c53b474a3'
 
+var AdmZip = require('adm-zip');
 let stopUploadFlag = false;
 let stopUploadInfo = new Object();
 
@@ -68,6 +69,7 @@ let folderOption1Path = "c:\\cresoty_backup\\option1.json";
 let initOptionPath = "c:\\cresoty_backup\\init.json";
 
 let firstInstall = false;
+let program_Pharm = "";
 
 function createWindow() {
   console.log('createWindow');
@@ -294,7 +296,7 @@ if (!gotTheLock) {
       let obj = {
         'optionFor1Folder_IncludeSubFolder':'YES',
         'optionFor2Folder_IncludeSubFolder':'YES',
-        'optionFor3Folder_IncludeSubFolder':'NO'
+        'optionFor3Folder_IncludeSubFolder':'YES'
       };
       fs.writeFile(folderOption1Path, JSON.stringify(obj,null,2), function writeJSON(err) {
         if (err) return log.error(err);
@@ -408,10 +410,10 @@ if (!gotTheLock) {
  }
 
  function createTable(tableName, window, callback){
-   console.log('createTable');
+   //console.log('createTable');
 
       knex.schema.hasTable(tableName).then(function(exists) {
-        log.info('createTable, exists = ',exists);
+        //log.info('createTable, exists = ',exists);
         if (!exists) {
           knex.schema.createTable(tableName, function(t) {
             t.increments('id').primary();
@@ -422,29 +424,30 @@ if (!gotTheLock) {
             t.integer('chainstatus'); //0: 초기값(업로드해야), 1: 업로드 완료, 2: 업로드에러 
            // t.string('time');
           }).then(()=>{
-            log.info('11..callback true');
+            //log.info('11..callback true');
             callback(true);
           }).catch(()=>{
             callback(false);
           });
         }else{
-          log.info('22..callback true');
+          //log.info('22..callback true');
           callback(true);
         }
       });
 
  }
 
- const MaxByte = 5*1024*1024*1024;
- function addFileFromDir(arg, window, callback){
+const MaxByte = 5*1024*1024*1024;
+function addFileFromDir(arg, window, callback){
   //console.log('addFileFromDir => folderIndex = ', arg);
   //var tableName = arg.username+':'+arg.folderIndex;
   var tableName = arg.username;
   let config3, folderOption1;
 
+  // 저장되어 있는 서브폴더 검색에 대한 옵션을 체크한다
   try{
     config3 = JSON.parse(fs.readFileSync(folderOption1Path));
-    log.debug('option1.json exists',config3);
+    //log.debug('option1.json exists',config3);
     if(arg.folderIndex == 0){
       folderOption1 = config3.optionFor1Folder_IncludeSubFolder;
     }else if(arg.folderIndex == 1){
@@ -456,7 +459,7 @@ if (!gotTheLock) {
       folderOption1 = 'YES';
     }
   }catch(err){
-    log.debug('option1.json does NOT exist',err);
+    //log.debug('option1.json does NOT exist',err);
     folderOption1 = 'YES';
   }
 
@@ -470,11 +473,12 @@ if (!gotTheLock) {
   let result = [];
   watcher
     .on('add', function(path, stats){
-      //log.info('add path = ',path, 'stats = ',stats);
+      // log.info('add path = ',path, 'stats = ',stats);
       result.push({
         fullpath: path,
         size: stats.size,
-        updated: stats.mtime
+        updated: stats.mtime,
+        updatedKST: stats.mtime.toLocaleString()
       })
     })
     //.on('addDir', path => log.info(`Directory ${path} has been added`))
@@ -484,30 +488,64 @@ if (!gotTheLock) {
     .on('ready', function() 
     { 
       log.info('Initial scan complete. Ready for changes.');
-      console.log('result = ', result);
+      log.info('result BEFORE ? = ', result);
       //log.info('tableName = ', tableName);
+      
+      //"pharm_3000" 팜IT3000 > "u_pharm" 유팜 > "e_pharm" 이팜
+      //"on_pharm" 온팜 > "ns_pharm" NS팜 > "cn_pharm" CN팜
+      // NS팜 프로그램 관련 조치 (가장 최근 mdf, ldf 파일만 zip으로 압축하여 업로드)
+      if(arg.folderIndex == 0 && program_Pharm=='ns_pharm'){
+        let returnList = [];
+        let resultLength = result.length;
+
+        for(let i=0;i<resultLength;i++){
+          let resultElement = result[resultLength-(i+1)];
+          if(resultElement.fullpath.toLowerCase().lastIndexOf('mdf')>0){
+            let fileName = resultElement.fullpath;
+            zipProcess(arg.path,fileName,program_Pharm);
+            let newName1 = fileName.replace('mpharm_','');
+            let newName2 = newName1.replace('.mdf','.zip');
+            resultElement.fullpath = newName2;
+            returnList.push(resultElement);
+            break;
+          }
+        }
+        result = returnList;
+      // CN팜 프로그램 관련 조치 (가장 최근 mdf, ldf 파일만 zip으로 압축하여 업로드)  
+      }else if(arg.folderIndex == 0 && program_Pharm =='cn_pharm'){
+        let returnList = [];
+        let resultLength = result.length;
+
+        for(let i=0;i<resultLength;i++){
+          let resultElement = result[resultLength-(i+1)];
+          if(resultElement.fullpath.toLowerCase().lastIndexOf('dmp')>0){
+            let fileName = resultElement.fullpath;
+            zipProcess(arg.path,fileName,program_Pharm);
+            let newName1 = fileName.replace('DB_','');
+            let newName2 = newName1.replace('.DMP','.zip');
+
+            resultElement.fullpath = newName2;
+            returnList.push(resultElement);
+            break;
+          }
+        }
+        result = returnList;
+      }
+
+      log.info('result AFTER ? = ', result);
+
       var  async = require("async");
       async.eachSeries(result, function(item, next) {
+        //log.info('item in addFileFromDir',item);
+
         let numberOfOriginalFolder = (arg.path.match(/\\/g) || []).length + 1;
         if(
           // npki 라는 경로가 있으면서 .zip이 아닌 파일은 업로드 하지 않는다
           (item.fullpath.toLowerCase().lastIndexOf('npki') > 0 && item.fullpath.lastIndexOf('.zip') < 0)
           // 만약 optionFor3Folder_IncludeSubFolder의 값이 no라면, 특정 폴더의 하위 폴더는 업로드 하지 않는다
           || (folderOption1.toLowerCase() == 'no' && ((item.fullpath.match(/\\/g) || []).length)>numberOfOriginalFolder) 
-        ){  //npki 내부 파일들은 zip으로 압축해서 올려야 하기때문
-          // DB에 기록하지 않는다.
-          // knex(tableName)
-          // .insert({filename: item.fullpath, filesize : item.size, 
-          //   fileupdate: item.updated, uploadstatus: 1, chainstatus: 1 })
-          // .then(()=>{
-          //  log.info('npki폴더내 파일 처리(zip제외)');
-          //  localStorage.getItem('member').then((value) => {
-          //    if(value != null){
-          //     next();
-          //    }
-          //  });
-
-          // });
+        ){
+          // 어떤 동작없이 리스트의 다음으로 넘어가는 부분  
           localStorage.getItem('member').then((value) => {
              if(value != null){
               next();
@@ -546,9 +584,8 @@ if (!gotTheLock) {
               
             }else{
               
-             log.info('업데이트 준비, results = ', results );
-             
-             for(var i =0; i< results.length; i++){
+              //log.info('업데이트 준비, results = ', results );
+              for(var i =0; i< results.length; i++){
 
                 var id = results[i]['id'];
                 var fsize = results[i]['filesize'];
@@ -556,69 +593,67 @@ if (!gotTheLock) {
                 var uploadstatus = results[i]['uploadstatus'];
                 var chainstatus = results[i]['chainstatus'];
 
-                log.info('변경 fsize = ', fsize , '현재 item = ',item);
-
+                //log.info('변경 fsize = ', fsize , '현재 item = ',item);
                 if(fsize != item.size){
                   if(uploadstatus == 0){
-                    log.info('업로드 전/실패, 파일변경 = ', item.fullpath);
+                    //log.info('업로드 전, 파일변경 = ', item.fullpath);
                     knex(tableName)
                     .where({id: id})
                     .update({filesize: item.size}).then((result)=>{
-                        log.info('결과 = ',result);
+                        //log.info('결과 = ',result);
                       });
                   }else if(uploadstatus == 1 && (chainstatus == 2 || chainstatus == 0)){
-                    log.info('업로드 완료, 블록체인 실패, 파일변경 = ', item.fullpath, '체인은 = ',chainstatus);
+                    //log.info('업로드 완료, 블록체인 실패, 파일변경 = ', item.fullpath, '체인은 = ',chainstatus);
                     if(item.size < MaxByte){
                     knex(tableName)
                     .where({id: id})
                     .update({filesize: item.size, fileupdate: item.update
                       , uploadstatus: 2, chainstatus: 0}).then((result)=>{
-                        log.info('결과 = ',result);
+                        //log.info('결과 = ',result);
                       });
                     }
                   } else if(uploadstatus == 1 && chainstatus == 1){
-                    log.info('업데이트목록으로, 파일변경 = ', item.fullpath);
+                    //log.info('업데이트목록으로, 파일변경 = ', item.fullpath);
                     if(item.size < MaxByte){
                       knex(tableName)
                       .where({id: id})
                       .update({filesize: item.size, fileupdate: item.update
                         , uploadstatus: 2, chainstatus: 0})
                       .then((result)=> {
-                        log.info('결과 = ',result);
+                        //log.info('결과 = ',result);
                       });
                     }
-
                   }else{
-                    log.info('체크 => results = ',results, 'item = ',item);
+                    //log.info('체크 => results = ',results, 'item = ',item);
                   }
                 }
 
-             }
+              }
              
              //변경사항 체크 완료 
-             localStorage.getItem('member').then((value) => {
-              if(value != null){
-              next();
-              }
-            });
+              localStorage.getItem('member').then((value) => {
+                if(value != null){
+                  next();
+                }
+              });
 
             }
           });
         }
 
     }, function(err) {
-      log.info("끝 = ", err);
+      log.info("Finish scanning File List  = ", err);
       watcher.close();
       callback(true);
       result = null;
       async = null;
-    })
+      })
 
   })
 
- }
+}
 
- function createNPKIzip(selectedPath, username){
+function createNPKIzip(selectedPath, username){
   let filename;
   var date = new Date(); 
   var year = date.getFullYear(); 
@@ -634,30 +669,18 @@ if (!gotTheLock) {
   } 
   
   var toDay = year.toString() + month + day;
-
-  if(month.length == 1){ 
-    month = "0" + month; 
-  } 
-  if(day.length == 1){ 
-    day = "0" + day; 
-  } 
-  
-  var toDay = year.toString() + month + day;
-
   filename = toDay+'-'+username+'-'+'NPKI';
-
-  log.info('filename = ',filename);
+  //log.info('filename = ',filename);
 
   var filepath = selectedPath + '/' + filename + '.zip';
-
-  log.info('filepath = ',filepath);
+  //log.info('filepath = ',filepath);
   try{
     var files = fs.readdirSync(selectedPath);
     for(var i in files) {
 
       if(files[i].toLowerCase().lastIndexOf('.zip') > 0){
         fs.unlinkSync(selectedPath +'/'+files[i]);
-        log.info('zip파일 삭제');
+        //log.info('zip파일 삭제');
       }else{
         //console.log('zip파일 아님');
       }
@@ -669,11 +692,11 @@ if (!gotTheLock) {
   
   try{
     zipper.sync.zip(selectedPath).compress().save(filepath);
-    log.info('zip파일 성공');
+    //log.info('zip파일 성공');
   } catch(err){
     log.error('zip파일 압축 실패');
   }
- }
+}
  
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
  *  IPC : ADD-ZIPFILE
@@ -721,7 +744,7 @@ ipcMain.on("REQ-UPLOADTREE", (event, arg) => {
       });
       //log.info(' UPLOADTREE, 조회 결과  = ', results);
       if(mainWindow && !mainWindow.isDestroyed()){
-        log.info('보냄 UPLOADTREE, main ');
+        //log.info('보냄 UPLOADTREE, main ');
         mainWindow.webContents.send("UPLOADTREE", {tree:results});
       }
     })
@@ -732,7 +755,7 @@ ipcMain.on("REQ-UPLOADTREE", (event, arg) => {
  *  모든 테이블을 뒤져야 한다.
  -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 ipcMain.on("REQ-CHAINTREE", (event, arg) => {
-  console.log('받음, REQ-CHAINTREE, main folderIndex = ',arg.folderIndex);
+  //console.log('받음, REQ-CHAINTREE, main folderIndex = ',arg.folderIndex);
  
  //db 테이블이 1개일때..
   var tableName = arg.username;
@@ -749,7 +772,7 @@ ipcMain.on("REQ-CHAINTREE", (event, arg) => {
 
       log.info('블록체인 조회 결과  = ', results);
       if(mainWindow && !mainWindow.isDestroyed()){
-        log.info('보냄 CHAINTREE, main ', results);
+        //log.info('보냄 CHAINTREE, main ', results);
         mainWindow.webContents.send("CHAINTREE", {tree:results});
       }
     })
@@ -760,26 +783,26 @@ ipcMain.on("REQ-CHAINTREE", (event, arg) => {
  -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 ipcMain.on("GETFOLDERTREE", (event, arg) => {
   
-  log.info('받음, GETFOLDERTREE, arg = ',arg);
+  //log.info('받음, GETFOLDERTREE, arg = ',arg);
   if (arg.path == null) {  //이게 없으면 watcher동작 안함
-    console.log('arg.path == null');
+    // console.log('arg.path == null');
     return;
   }
 
-  //log.info('선택한 폴더는 = ', arg.path);
-  //zip파일 생성
-  if(arg.path.toLowerCase().lastIndexOf('npki') > 0){
-    log.info('zip파일생성');
+  //NPKI폴더 이면서 폴더2(index=1)일 경우, zip파일 생성
+  if(arg.path.toLowerCase().lastIndexOf('npki') > 0 && arg.folderIndex == 1){
+    //log.info('zip파일생성');
     createNPKIzip(arg.path, arg.username);
   }
-
+ 
   if(stopUploadFlag){
     log.error('클라우드 용량초과로 파일검색 중지');
     showMainWindow();
     mainWindow.webContents.send("STOP-GET-FOLDER-TREE", {limitsize:stopUploadInfo['limitsize'], currentsize:stopUploadInfo['currentsize']});
   }else{
+    log.info('addFileFromDir Start');
     addFileFromDir(arg, mainWindow, (result)=>{
-      log.info('폴더 트리 결과 = ',result);
+      log.info('Is it ready to upload = ',result);
       localStorage.getItem('member').then((value) => {
         //log.info('로그아웃 => ', value);
         if(value == null){
@@ -788,11 +811,12 @@ ipcMain.on("GETFOLDERTREE", (event, arg) => {
       });
 
       if(mainWindow && !mainWindow.isDestroyed()){
-        log.info('GETFOLDERTREE => 전송 ');
+        //log.info('GETFOLDERTREE => 전송 ');
         mainWindow.webContents.send("GETFOLDERTREE", "Complete Scanning Folder");
       }
     });
   }
+  
  
 });
 
@@ -943,9 +967,10 @@ ipcMain.on('PCRESOURCE', (event, arg) => {
   localStorage.getItem('member').then((value) => {
     member = JSON.parse(value);
 
+    program_Pharm = member.program;
     let limitsize = Number(member.limitsize);
     let currentsize = Number(member.currentsize);
-    log.info('cloud size', limitsize, currentsize);
+    log.info('cloud size(Gb)', limitsize, currentsize/1000000000);
     limitsize = limitsize * 1024 * 1024 * 1024;
     if(currentsize >= limitsize){
       creatWarnWindow();
@@ -953,17 +978,17 @@ ipcMain.on('PCRESOURCE', (event, arg) => {
       stopUploadInfo['limitsize'] = limitsize;
       stopUploadInfo['currentsize'] = currentsize;
     }
-    log.info('PCRESOURCE > member',member);
+    //log.info('PCRESOURCE > member',member);
   });
   // === END : after comparing cloud limit and size, show a window of warning
 
 
-  console.log('받음 main, PCRESOURCE');
+  //console.log('받음 main, PCRESOURCE');
   let ipaddress;
   let macaddress;
   
   var interfaces = os.networkInterfaces();
-  log.info('interfaces = ',interfaces);
+  //log.info('interfaces = ',interfaces);
 
   let hostName = os.hostname();
   log.info('hostName =>',hostName);
@@ -972,7 +997,7 @@ ipcMain.on('PCRESOURCE', (event, arg) => {
     .map(x => interfaces[x].filter(x => x.family === 'IPv4' && !x.internal)[0])
     .filter(x => x);
 
-  log.info('maps =>',maps);
+  //log.info('maps =>',maps);
   if(maps != null) {
     ipaddress = maps[0].address;
     // macaddress = maps[0].mac;
@@ -980,28 +1005,28 @@ ipcMain.on('PCRESOURCE', (event, arg) => {
   }
 
   localStorage.getItem('ipaddress').then((value) => {
-    log.info('ipaddress in localstorage => ', value);
+    //log.info('ipaddress in localstorage => ', value);
     if(value == undefined || value == null){
       localStorage.setItem('ipaddress',ipaddress).then(()=>{
-        log.info(ipaddress,'ipaddress localstorage 저장');
+        //log.info(ipaddress,'ipaddress localstorage 저장');
       });
     }else{
       ipaddress = value;
-      log.info('ipaddress from localstorage');
+      //log.info('ipaddress from localstorage');
     }
   });
 
   localStorage.getItem('macaddress').then((value) => {
-    log.info('hostName in localstorage => ', value);
+    //log.info('hostName in localstorage => ', value);
     if(value == undefined || value == null){
       localStorage.setItem('macaddress',macaddress).then(()=>{
-        log.info(macaddress,'hostName localstorage 저장');
+        //log.info(macaddress,'hostName localstorage 저장');
       });
     }else{
       macaddress = value;
-      log.info('hostName from localstorage');
+      //log.info('hostName from localstorage');
     }
-    log.info('ipaddress = ',ipaddress);
+    //log.info('ipaddress = ',ipaddress);
     log.info('hostName = ',macaddress);
   
     if(mainWindow && !mainWindow.isDestroyed()){
@@ -1018,7 +1043,7 @@ ipcMain.on('PCRESOURCE', (event, arg) => {
 });
 
 ipcMain.on('SELECTFOLDER', (event, arg) => {
-  console.log('받음,main, SELECTFOLDER');
+  //console.log('받음,main, SELECTFOLDER');
   var directory = dialog.showOpenDialog(mainWindow, {
     properties: ['openDirectory']
 
@@ -1032,10 +1057,10 @@ ipcMain.on('SELECTFOLDER', (event, arg) => {
     //db생성
     //db table 생성
     createTable(tableName, mainWindow,(result) => {
-      log.info('보냄,main, SELECTFOLDER');
+      //log.info('보냄,main, SELECTFOLDER');
 
       if(result){
-        log.info('result = ',result);
+        //log.info('result = ',result);
         mainWindow.webContents.send("SELECTFOLDER", {
           error: null,
           folderIndex: arg.folderIndex,
@@ -1299,3 +1324,75 @@ function handleSquirrelEvent(application) {
   }
 };
 
+function createZipPharm(selectedPath, program_Pharm){
+
+  let targetList1 = [];
+  try{
+    var files = fs.readdirSync(selectedPath);
+    for(var i in files) {
+      if(files[i].toLowerCase().lastIndexOf('.mdf') > 0){
+        targetList1.push(files[i]);
+      }
+    }
+    // 파일리스트 최신순으로 정렬
+    targetList1.sort(function(a, b) {
+      let aLocation = a.toLowerCase().lastIndexOf('_');
+      let s1 = Number(a.substr(aLocation+1,10));
+      let bLocation = b.toLowerCase().lastIndexOf('_');
+      let s2 = Number(b.substr(bLocation+1,10));
+      if (s1 < s2) { return 1; }
+      if (s1 > s2) { return -1; }
+      return 0;
+    });
+  }catch(err){
+    log.error('Backup 폴더정보 읽기 실패');
+  }
+  
+  let transferList = [];
+  // if(firstInstall){
+    transferList = targetList1.slice(0,3);
+  // }else{
+  //   transferList = targetList1.slice(0,1);
+  // }
+  // zipper.sync.zip(selectedPath).compress().save(filepath);
+  // log.info('zip파일 시작 11',firstInstall);
+  zipProcess(selectedPath,transferList,program_Pharm);
+  
+}
+
+function zipProcess(selectedPath,fileName,program_Pharm){
+  
+  // log.info('zip파일 시작 22',targetList1);
+  let filepath, target1, target2;
+  if(program_Pharm =='ns_pharm'){
+    let targetFile = fileName;
+    let a_Location = targetFile.toLowerCase().lastIndexOf('_');
+    let s1 = targetFile.substr(a_Location+1,10);
+
+    filepath = selectedPath + '/' + s1 + ".zip";
+    target1 = targetFile;
+    target2 = target1.replace('.mdf','.ldf');
+
+  }else if(program_Pharm == 'cn_pharm'){
+    let targetFile = fileName;
+    let a_Location = targetFile.toLowerCase().lastIndexOf('_');
+    let s1 = targetFile.substr(a_Location+1,10);
+
+    filepath = selectedPath + '/' + s1 + ".zip";
+    target1 = targetFile;
+    let target11 = target1.replace('.DMP','.sql');
+    target2 = target11.replace('DB','MariaDB');
+    log.info('target2 in cn_pharm',target2);
+  }
+
+  try{
+    if (!fs.existsSync(filepath)) { 
+      var zip = new AdmZip();
+      zip.addLocalFile(target1);
+      zip.addLocalFile(target2);
+      zip.writeZip(filepath);
+    } 
+  }catch(e){
+    log.info('error in zip process',e);
+  }
+}

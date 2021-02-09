@@ -138,7 +138,7 @@ export class LoginPageComponent implements OnInit {
         member.limitsize = result[4];
         member.currentsize = result[5];
         // member.program = this.program;
-        log.info("member before stored = ", member);
+        //log.info("member before stored = ", member);
         storage.set('member',member);
         storage.set('login',true);
         

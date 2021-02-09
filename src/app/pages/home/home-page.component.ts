@@ -573,7 +573,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
      ----------------------------------------------------------------*/
 
     this.electronService.ipcRenderer.on('SELECTFOLDER', (event: Electron.IpcMessageEvent, response: any) => {
-      log.info('받음,home-page, SELECTFOLDER', response, this.uploading);
+      //log.info('받음,home-page, SELECTFOLDER', response, this.uploading);
       //log.info('받음,home-page, SELECTFOLDER = ',response.directory);
 
       this.electronService.ipcRenderer.removeListener('SELECTFOLDER', (event: Electron.IpcMessageEvent, response: any)=>{
@@ -589,7 +589,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
         //this.uploadFiletreeService.fillFollders(); 현재는 폴더인덱스만 있으면 됨
         console.log('home-page, uploading?? ', this.uploading)
         if (this.uploading === false) {
-          log.info('home-page, SELECTFOLDER ?? folderIndex = ', response.folderIndex)
+          //log.info('home-page, SELECTFOLDER ?? folderIndex = ', response.folderIndex)
           this.storageService.set('login',false); 
           this.onStartUploadFolder(response.folderIndex, 3);  //3초후에 업로드
         }

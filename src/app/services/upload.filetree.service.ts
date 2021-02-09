@@ -82,13 +82,12 @@ export class UploadFiletreeService {
     });
 
     this.electronService.ipcRenderer.on('GETFOLDERTREE', (event: Electron.IpcMessageEvent, response: any) => {
-      log.info('새로만든, 받음 GETFOLDERTREE, response = ',response);
-
+      //log.info('새로만든, 받음 GETFOLDERTREE, response = ',response);
     
       //fullpath 변수 사용? 안하게?
       //목록 구성이 끝난 폴더의 사이즈 요청
       //1. 블록체인 에러 목록 요청 하고 업로드
-      log.info('this.member.private = ',this.member.private);
+      //log.info('this.member.private = ',this.member.private);
       if(this.member.private){
         this.sendIndex = 0;
         this.electronService.ipcRenderer.send('REQ-UPLOADTREE', {
@@ -102,18 +101,12 @@ export class UploadFiletreeService {
           username: this.member.username
         });
       }
-      
-      //폴더 사이즈 query 구현은 하지 않아서 뺀다.
-      // this.electronService.ipcRenderer.send('REQ-DIRSIZE', {
-      //   folderIndex: this.folderIndex,
-      //   username: this.member.username
-      // });
 
       this.electronService.ipcRenderer.removeListener('GETFOLDERTREE', (event: Electron.IpcMessageEvent, response: any)=>{
-        log.info('GETFOLDERTREE, 콜백한번만 호출되게...');
+        //log.info('GETFOLDERTREE, 콜백한번만 호출되게...');
       });
 
-     });
+    });
 
     /*----------------------------------------------------
        *  IPC Response : STOP GET FOLDER TREE
@@ -145,7 +138,7 @@ export class UploadFiletreeService {
        
       ----------------------------------------------------*/
       this.electronService.ipcRenderer.on('CHAINTREE', (event: Electron.IpcMessageEvent, response: any) => {
-        log.info('받음 CHAINTREE ');
+        //log.info('받음 CHAINTREE ');
         console.log('requestChainErrorList =>CHAINTREE');
         const fileTree = response.tree; 
   
@@ -164,11 +157,11 @@ export class UploadFiletreeService {
           });
         }
   
-        log.info('chainsToSend = ',this.chainsToSend);
+        //log.info('chainsToSend = ',this.chainsToSend);
   
         if(this.chainsToSend.length > 0){
           //파일 업로드 
-          log.info('블록체인 업로드 실패목록 전송, sendIndex = ', this.sendIndex);
+          //log.info('블록체인 업로드 실패목록 전송, sendIndex = ', this.sendIndex);
           this.uploadManager(this.chainsToSend[this.sendIndex], "chain-error");
         } else{
           //2. 업로드 목록 요청 하고 업로드
@@ -181,7 +174,7 @@ export class UploadFiletreeService {
           });
         }
         this.electronService.ipcRenderer.removeListener('CHAINTREE', (event: Electron.IpcMessageEvent, response: any)=>{
-          log.info('블록체인에러, 콜백한번만 호출되게...');
+          //log.info('블록체인에러, 콜백한번만 호출되게...');
         });
 
       });
@@ -228,7 +221,7 @@ export class UploadFiletreeService {
        
       ----------------------------------------------------*/
     this.electronService.ipcRenderer.on('UPLOADTREE', (event: Electron.IpcMessageEvent, response: any) => {
-      log.info('받음 UPLOADTREE ');
+      //log.info('받음 UPLOADTREE ');
       const fileTree = response.tree; 
 
       this.addfilesToSend = [];
@@ -247,12 +240,12 @@ export class UploadFiletreeService {
 
       if(this.addfilesToSend.length > 0){
         //파일 업로드 
-        log.info('처음, 업로드, sendIndex = ', this.sendIndex);
-        log.info('this.addfilesToSend.length = ',this.addfilesToSend.length);
+        //log.info('처음, 업로드, sendIndex = ', this.sendIndex);
+        log.info('# of upload Files = ',this.addfilesToSend.length);
         this.uploadManager(this.addfilesToSend[this.sendIndex], "add-file");
       } else{
         //2. 업데이트 목록 요청 하고 업로드
-        log.info('목록없음으로, 업데이트 목록 요청');
+        //log.info('목록없음으로, 업데이트 목록 요청');
         this.addfilesToSend = null;
         this.sendIndex = 0;
 
@@ -263,7 +256,7 @@ export class UploadFiletreeService {
       }
 
       this.electronService.ipcRenderer.removeListener('UPLOADTREE', (event: Electron.IpcMessageEvent, response: any)=>{
-        log.info('콜백한번만 호출되게...');
+        //log.info('콜백한번만 호출되게...');
       });
     });
 
@@ -322,12 +315,10 @@ export class UploadFiletreeService {
           if(this.addfilesToSend.length > this.sendIndex){
             this.uploadManager(this.addfilesToSend[this.sendIndex], "add-file");
           }else{
-            log.info('삭제된 파일이 폴더의 마지막!!');
+            // log.info('삭제된 파일이 폴더의 마지막!!');
             this.gotoNext();
           }
-        }
-        
-        else{
+        }else{
           log.error('22..업로드 에러 = ', response.error);
           if(response.error == '403' || response.error == 403 
              || response.error == '401' || response.error == 401){
@@ -487,80 +478,26 @@ export class UploadFiletreeService {
       }
     }); 
 
-
-  /*----------------------------------------------------
-    *  IPC Response : Get chain-update
-    폴더사이즈 구현은 하지 않는다.
-    
-  ----------------------------------------------------*/
-//   this.electronService.ipcRenderer.on('DIRSIZE', (event: Electron.IpcMessageEvent, response: any) => {
-//     log.info('받음 폴더사이즈 = ', response);
-    
-//     this.notification.next({
-//        cmd: 'FOLDER.INFO',
-//        folderData: {
-//           index: response.folderIndex,
-//           size:response.dirsize
-//         }
-//     });
-    
-//     this.electronService.ipcRenderer.removeListener('DIRSIZE', (event: Electron.IpcMessageEvent, response: any)=>{
-//       log.info('폴더사이즈 콜백한번만 호출되게...');
-//     });
-//   });
-
-
   }
 
-   /*----------------------------------------------------
-    *  IPC Response : Get DIR size
-       폴더 사이즈 얻기
-       
-   ----------------------------------------------------*/
-  //  getFolderSize(){
-  //    log.info('폴더사이즈 얻기')
-  //    var electronService = new ElectronService();
-  //    electronService.ipcRenderer.on('UPDATETREE', (event: Electron.IpcMessageEvent, response: any) => {
-  //    });
-  //  }
-
-   /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-   *  Constructor
-   올바른 폴더를 올리기 위해서...
-   일단 사용안함.
-   -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
-  //  fillFollders() {
-  //   //console.log('fillFollders ');
-  //  // this.folders = new Array(4);
-
-
-  //   // for (let i = 0; i < 4; i++) {
-  //   //   this.folders[i] = {
-  //   //     path: this.storageService.get(this.getFolderKey(i))
-  //   //   };
-  //   // }
-
-  //   //console.log('this.folders = ',this.folders);
-  // }
 
   getFolderPath(folderIndex) {
     return this.storageService.get(this.getFolderKey(folderIndex));
   }
 
-
-   requestChainErrorList(event){
+  requestChainErrorList(event){
     console.log('requestChainErrorList');
     log.info('블록체인 업로드 실패 목록 요청');
     this.sendIndex = 0;
   }
 
-   requestUploadList(event){
+  requestUploadList(event){
     //console.log('requestUploadList');
     log.info('업로드 목록 요청 username = ',this.member.username);
     this.sendIndex = 0;
   }
 
-   requestUpdateList(){
+  requestUpdateList(){
     log.info('업데이트 요청');
  
   }
@@ -631,7 +568,7 @@ export class UploadFiletreeService {
     this.member = this.memberAPI.isLoggedin();
     var size =  (item.filesize / 1024 ) ;
     
-    log.info('item = ', item);
+    //log.info('item = ', item);
 
     if(item.filepath.toLowerCase().indexOf('data_backup') >= 0){
        //하위폴더, zip, 다른 파일이 존재함.
@@ -760,9 +697,6 @@ export class UploadFiletreeService {
    * 토큰을 얻고, 토큰을 얻으면 서버에서 목록조회
    * 업로딩에 필요한 변수 초기화
    -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
-  // upload(folderIndex, fullpath) {
-
-  // }
 
   /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
    *  Process a file
