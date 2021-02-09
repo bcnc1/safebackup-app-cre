@@ -34,7 +34,6 @@ export class HomePageComponent implements OnInit, OnDestroy {
   private deviceResource;
   private uploadSubscribe;
 
-
   public rootFolderName;
   public rootFolderData;
   public parentFolder;
@@ -93,7 +92,6 @@ export class HomePageComponent implements OnInit, OnDestroy {
     this.electronService.ipcRenderer.removeAllListeners('SELECTFOLDER');
   }
 
-
   /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
    *  탭 버튼을 누를경우 저장된 폴더의 패스를 구해와서 보여주기 위한 것임
    -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
@@ -151,7 +149,6 @@ export class HomePageComponent implements OnInit, OnDestroy {
     this.ReadFolderInfo();
   }
 
-
   onRequestFolderData(folderIndex) {
     console.log('home-page, onRequestFolderData');
     console.log('this.deviceResource ',this.deviceResource);
@@ -162,7 +159,6 @@ export class HomePageComponent implements OnInit, OnDestroy {
     const folder = this.storageService.get(folderKey);
 
   }
-
 
   /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
    *  Get FileTree from server
@@ -201,13 +197,11 @@ export class HomePageComponent implements OnInit, OnDestroy {
     if (after == null) {
       after = 6;
     }
-     const folderKey = this.getFolderKey(folderIndex);
-     const folder = this.storageService.get(folderKey);  //폴더키로 조회하면 선택한 폴더를 스토리지로 부터 얻을 수 있다.
-     log.info('home-page onStartUploadFolder = ', folder, 'folderKey = ', folderKey, 'after = ',after);
-
+    const folderKey = this.getFolderKey(folderIndex);
+    const folder = this.storageService.get(folderKey);  //폴더키로 조회하면 선택한 폴더를 스토리지로 부터 얻을 수 있다.
+    log.info('home-page onStartUploadFolder = ', folder, 'folderKey = ', folderKey, 'after = ',after);
 
     this.timergetTree =  setTimeout(()=> {
-        
         //log.info('fscan = ', this.storageService.get('fscan'));
         if(!this.uploading){
           this.uploading = true;
@@ -216,8 +210,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
           log.info('업로드 중이라 다시 셋팅 값 = ', after);
           this.onStartUploadFolder(folderIndex, after)
         }
-
-     }, after * 1000);  
+    }, after * 1000);  
 
      
   }
@@ -311,10 +304,10 @@ export class HomePageComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-   // console.log('home-page, ngOnInit');
+    // console.log('home-page, ngOnInit');
     this.version = environment.VERSION;
     this.electronService.ipcRenderer.send('PCRESOURCE', null);
-    console.log('보냄 home-page, PCRESOURCE');
+    // console.log('보냄 home-page, PCRESOURCE');
     
     this.member = this.memberAPI.isLoggedin();
     this.memberPrivate = this.member.private;
@@ -350,9 +343,6 @@ export class HomePageComponent implements OnInit, OnDestroy {
     }else{
       this.maxFolder = this.PUBLIC_FLENGTH;
       this.foldersSize = new Array(this.PUBLIC_FLENGTH);
-
-     // console.log('maxFolder =' ,this.maxFolder);
-
       this.storageService.set('maxfolder', this.maxFolder); 
     }
 
@@ -386,10 +376,10 @@ export class HomePageComponent implements OnInit, OnDestroy {
       return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 
+
     /*---------------------------------------------------------------
            Subscribe to notification
      ----------------------------------------------------------------*/
-  
     this.uploadSubscribe = this.uploadFiletreeService.notified().subscribe(message => {
 
       //this.uploadSubscribe.complete();
@@ -419,7 +409,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
          ----------------------------------------------------------------*/
         console.log('homepage -> 폴더전송완료');
         //this.logger.debug(new Date(), message);
-        log.info('homepage => 전송완료된 폴더 folderIndex : ', (message.folderIndex -1), );
+        log.info('전송완료된 폴더 folderIndex : ', (message.folderIndex -1), );
 
 
         if(message.folderIndex < this.maxFolder){
@@ -428,6 +418,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
           this.onStartUploadFolder(message.folderIndex , 5);
         } else {
           log.info('homepage -> 모두완료 다음시간설정');
+          this.electronService.ipcRenderer.send('DELETE-ZIP-FILE', null);
 
           this.uploading = false;
           //kimcy: test code
@@ -438,7 +429,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
           //서버에서 배치타임 (delete)되는 시간을 벌어주기 위해
           if(moment().endOf('day').diff(next) < 0 ){
             //다음날임으로 6시간 후 시작
-            log.info('다음날임으로 6시간 후 시작');
+            // log.info('다음날임으로 6시간 후 시작');
             var nextTime = next.add(6,'hour');
             const str = nextTime.format('MM월DD일 HH시 mm분');
             this.konsoleService.sendMessage({
@@ -456,7 +447,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
           this.memberAPI.getLoginToken(this.member,this.storageService, (res) =>{
             if(res){
               this.member = this.storageService.get('member');
-              log.info('업로드 완료 후 this.member = > ', this.member);
+              // log.info('업로드 완료 후 this.member = > ', this.member);
 
               if(this.member.noticeurgent){
                 log.info('call => getUrgentNotice');
@@ -559,19 +550,19 @@ export class HomePageComponent implements OnInit, OnDestroy {
         
       }, 3000);  //폴더선택
 
+
     /*----------------------------------------------------
        *  IPC Response : Get FileTree
-       ----------------------------------------------------*/
+    ----------------------------------------------------*/
     this.electronService.ipcRenderer.on('PCRESOURCE', (event: Electron.IpcMessageEvent, response: any) => {
-      console.log('받음 home-page, PCRESOURCE, response = ',response);
+      // console.log('받음 home-page, PCRESOURCE, response = ',response);
       this.deviceResource = response;
     });
 
 
     /*---------------------------------------------------------------
            LISTENER : SELECTFOLDER의 리스너
-     ----------------------------------------------------------------*/
-
+    ----------------------------------------------------------------*/
     this.electronService.ipcRenderer.on('SELECTFOLDER', (event: Electron.IpcMessageEvent, response: any) => {
       //log.info('받음,home-page, SELECTFOLDER', response, this.uploading);
       //log.info('받음,home-page, SELECTFOLDER = ',response.directory);
@@ -601,7 +592,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
     /*---------------------------------------------------------------
            서버에 저장된 Folder의 File 목록들을 받아온다
            (초기 목록 보여주기 용)
-     ----------------------------------------------------------------*/
+    ----------------------------------------------------------------*/
     this.onTab(0);
 
     this.ReadFolderInfo();

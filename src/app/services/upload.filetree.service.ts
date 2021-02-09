@@ -302,7 +302,7 @@ export class UploadFiletreeService {
         }
       }else{
         if(response.error === null ){ //파일업로드 완료
-          log.info('파일업로드완료 , 블록체인으로 이동')
+          // log.info('파일업로드완료 , 블록체인으로 이동')
           //main
           this.uploadManager(this.addfilesToSend[this.sendIndex], "chain-create");
         }else if(response.error === "1010" ){
@@ -634,16 +634,14 @@ export class UploadFiletreeService {
     if(type == 'chain-error' || type == 'chain-create' || type == 'chain-update'){
       this.electronService.ipcRenderer.send('SEND-CHAINFILE', post);
       chainuploading = true;
-      log.info('체인파일은 = ',post);
+      // log.info('체인파일은 = ',post);
     }else{
       this.electronService.ipcRenderer.send('SEND-FILE', post); //비동기
       chainuploading = false;
       log.info('업로드파일은 = ',post);
     }
     if(!chainuploading){
-      console.log('파일업로딩 ',size.toFixed(2));
-
-
+      // console.log('파일업로딩 ',size.toFixed(2));
       this.notification.next({
         cmd: 'SENDING.STARTED',
         message: '[' + (item.folderIndex + 1) + '] ' + item.filepath + ' 업로딩...' + size.toFixed(2) +'KB'
@@ -676,9 +674,9 @@ export class UploadFiletreeService {
     } else{
 
       if (this.electronService.isElectronApp) { //앱이 실행중이라면..
-        console.log('11..upload ->앱이실행중이라 업로드');
+        // console.log('11..upload ->앱이실행중이라 업로드');
         this.notification.next({cmd: 'LOG', message: '['+ (folderIndex + 1)+']'+fullpath + ' 업로드를 시작합니다.'});
-        log.info('보냄, GETFOLDERTREE, upload-filetree');
+        // log.info('보냄, GETFOLDERTREE, upload-filetree');
         this.electronService.ipcRenderer.send('GETFOLDERTREE', {
           folderIndex: folderIndex,
           username: member.username,

@@ -48,6 +48,8 @@ var AdmZip = require('adm-zip');
 let stopUploadFlag = false;
 let stopUploadInfo = new Object();
 
+let backupFolder_creSoty = '';
+
 if (handleSquirrelEvent(app)) {
   // squirrel event handled and app will exit in 1000ms, so don't do anything else
   // app.exit(0); 
@@ -72,7 +74,8 @@ let firstInstall = false;
 let program_Pharm = "";
 
 function createWindow() {
-  console.log('createWindow');
+  // console.log('createWindow');
+  log.info('createWindow');
   /*---------------------------------------------------------------
                TRAY
    ----------------------------------------------------------------*/
@@ -88,7 +91,7 @@ function createWindow() {
       label: '종료',
       click: function () {
         isQuiting = true;
-        console.log('트레이종료');
+        // console.log('트레이종료');
         app.quit();
       }
     }
@@ -144,7 +147,7 @@ function createWindow() {
       mainWindow.show();
     }else{
       mainWindow.hide();
-      log.warn('Hide main Window');
+      // log.warn('Hide main Window');
     }
     // setTimeout(function () {
     //   mainWindow.minimize();
@@ -252,65 +255,59 @@ function showMainWindow(){
 
 try {
 
-  //kimcy
-const gotTheLock = app.requestSingleInstanceLock()
 
-if (!gotTheLock) {
-  app.quit()
-} else {
-  app.on('second-instance', (event, commandLine, workingDirectory) => {
-    // Someone tried to run a second instance, we should focus our window.
-    if (mainWindow) {
-      if (mainWindow.isMinimized()) mainWindow.restore()
-      mainWindow.focus()
-    }
-  })
+  const gotTheLock = app.requestSingleInstanceLock()
 
-  app.on('ready', ()=> {
-    console.log('Ready');
+  if (!gotTheLock) {
+    app.quit()
+  } else {
+    app.on('second-instance', (event, commandLine, workingDirectory) => {
+      // Someone tried to run a second instance, we should focus our window.
+      if (mainWindow) {
+        if (mainWindow.isMinimized()) mainWindow.restore()
+        mainWindow.focus()
+      }
+    })
 
-    if(fs.existsSync(initOptionPath)){
-      log.info('NOT First install');
-      createWindow();
-      createSBDatabBase();
-      initDataBackup();
-    }else{
-      localStorage.clear();
-      localStorage.removeItem('member');
-      log.info('First install');
-      firstInstall = true;
-      let obj = {
-        'first':'YES'
-      };
-      fs.writeFile(initOptionPath, JSON.stringify(obj,null,2), function writeJSON(err) {
-        if (err) return log.error(err);
-      });
-      setTimeout(function(){
+    app.on('ready', ()=> {
+      // console.log('Ready');
+
+      if(fs.existsSync(initOptionPath)){
+        log.info('NOT First install');
         createWindow();
         createSBDatabBase();
         initDataBackup();
-      },2000)
-    }
+      }else{
+        localStorage.clear();
+        localStorage.removeItem('member');
+        log.info('First install');
+        firstInstall = true;
+        let obj = {
+          'first':'YES'
+        };
+        fs.writeFile(initOptionPath, JSON.stringify(obj,null,2), function writeJSON(err) {
+          if (err) return log.error(err);
+        });
+        setTimeout(function(){
+          createWindow();
+          createSBDatabBase();
+          initDataBackup();
+        },2000)
+      }
 
-    if (!fs.existsSync(folderOption1Path)) {
-      let obj = {
-        'optionFor1Folder_IncludeSubFolder':'YES',
-        'optionFor2Folder_IncludeSubFolder':'YES',
-        'optionFor3Folder_IncludeSubFolder':'YES'
-      };
-      fs.writeFile(folderOption1Path, JSON.stringify(obj,null,2), function writeJSON(err) {
-        if (err) return log.error(err);
-      });
-    }
-  });
-}
+      if (!fs.existsSync(folderOption1Path)) {
+        let obj = {
+          'optionFor1Folder_IncludeSubFolder':'YES',
+          'optionFor2Folder_IncludeSubFolder':'YES',
+          'optionFor3Folder_IncludeSubFolder':'YES'
+        };
+        fs.writeFile(folderOption1Path, JSON.stringify(obj,null,2), function writeJSON(err) {
+          if (err) return log.error(err);
+        });
+      }
+    });
+  }
 
-//kimcy: 인스턴스 여러개..
-//  app.on('ready', ()=> {
-//   console.log('Ready');
-//   createWindow();
-//   createSBDatabBase();
-//  });
 
   // Quit when all windows are closed.
   // kimcy 강제종료는 tray에서만 하는것으로??
@@ -364,52 +361,39 @@ if (!gotTheLock) {
   // throw e;
 }
 
- var sqlite3 = require('sqlite3').verbose();
+var sqlite3 = require('sqlite3').verbose();
  
- function createSBDatabBase(){
+function createSBDatabBase(){
   localStorage.getItem('member').then((value) => {
     member = JSON.parse(value);
     
-
     if (fs.existsSync(app.getPath('userData')+'/'+ 'sb.db')) {
-      console.log('exists');
+      // console.log('exists');
     } else{
-      console.log('does not');
+      // console.log('does not');
       var db = new sqlite3.Database(app.getPath('userData')+'/'+ 'sb.db');
       db.close();
 
-      //initDataBackup()//처음 한번만 만든다.
     }
-
-    //"-"특수문자는 table명으로 사용하지 못함(for db migration)
-    // (async function(){
-    //   const res = await knexCreateTable(member.username);
-    //   console.log('KNEX', res);
-    // })();
-
-    // (async function(){
-    //   const res = await knexInsertTable(member.username);
-    //   console.log('KNEX', res);
-    // })();
 
    });
   
- }
+}
 
- function initDataBackup(){
+function initDataBackup(){
   localStorage.getItem('data_backup').then((value) => {
-    log.info('initDataBackup => ', value);
+    // log.info('initDataBackup => ', value);
     //log.info('initDataBackup => ', typeof value);
     if(value == undefined){
       localStorage.setItem('data_backup',"undefined").then(()=>{
-        log.info('undefine 저장');
+        // log.info('undefine 저장');
       });
     }
   });
   
- }
+}
 
- function createTable(tableName, window, callback){
+function createTable(tableName, window, callback){
    //console.log('createTable');
 
       knex.schema.hasTable(tableName).then(function(exists) {
@@ -435,7 +419,7 @@ if (!gotTheLock) {
         }
       });
 
- }
+}
 
 const MaxByte = 5*1024*1024*1024;
 function addFileFromDir(arg, window, callback){
@@ -489,7 +473,7 @@ function addFileFromDir(arg, window, callback){
     { 
       log.info('Initial scan complete. Ready for changes.');
       fileSort(result);
-      log.info('result BEFORE ? = ', result);
+      // log.info('result BEFORE ? = ', result);
       //log.info('tableName = ', tableName);
       
       //"pharm_3000" 팜IT3000 > "u_pharm" 유팜 > "e_pharm" 이팜
@@ -552,7 +536,7 @@ function addFileFromDir(arg, window, callback){
         result = returnList;
       }
 
-      log.info('result AFTER ? = ', result);
+      // log.info('result AFTER ? = ', result);
 
       var  async = require("async");
       async.eachSeries(result, function(item, next) {
@@ -790,7 +774,7 @@ ipcMain.on("REQ-CHAINTREE", (event, arg) => {
         element.tbName = tableName;
       });
 
-      log.info('블록체인 조회 결과  = ', results);
+      // log.info('블록체인 조회 결과  = ', results);
       if(mainWindow && !mainWindow.isDestroyed()){
         //log.info('보냄 CHAINTREE, main ', results);
         mainWindow.webContents.send("CHAINTREE", {tree:results});
@@ -1047,10 +1031,10 @@ ipcMain.on('PCRESOURCE', (event, arg) => {
       //log.info('hostName from localstorage');
     }
     //log.info('ipaddress = ',ipaddress);
-    log.info('hostName = ',macaddress);
+    // log.info('hostName = ',macaddress);
   
     if(mainWindow && !mainWindow.isDestroyed()){
-      log.info('보냄 main, PCRESOURCE',ipaddress,macaddress);
+      // log.info('보냄 main, PCRESOURCE',ipaddress,macaddress);
       mainWindow.webContents.send("PCRESOURCE", {
         ipaddresses: maps,
         ipaddress: ipaddress,
@@ -1093,6 +1077,47 @@ ipcMain.on('SELECTFOLDER', (event, arg) => {
     });
   }
 });
+
+ipcMain.on('DELETE-ZIP-FILE', (event, arg) => {
+
+  log.info('Delete Zip files in backup folder');
+  if(backupFolder_creSoty == ''){
+    log.info('Not a pharm program to delete files');
+  }else{
+
+    let targetList1 = [];
+    try{
+      var files = fs.readdirSync(backupFolder_creSoty);
+      for(var i in files) {
+        if(files[i].toLowerCase().lastIndexOf('.zip') > 0){
+          targetList1.push(files[i]);
+        }
+      }
+      
+      targetList1.sort(function(a, b) {
+        let s1 = fs.stats(a).ctime;
+        let s2 = fs.stats(b).ctime;
+        if (s1 < s2) { return 1; }
+        if (s1 > s2) { return -1; }
+        return 0;
+      });
+
+      if(targetList1.length <= 3){
+        log.error('None to delete');
+      }else{
+        for(var j=3;j<targetList1.length;j++){
+          fs.unlinkSync(backupFolder_creSoty +'/'+targetList1[i]);
+        }
+        log.error('Backup 폴더 delete : Done');
+      }
+    }catch(err){
+      log.error('Backup 폴더 지우기 실패',err);
+    }
+
+  }
+
+});
+
 
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
  *  chain upload
@@ -1178,7 +1203,7 @@ var fileupload = function (arg){
 
   let startTime = new Date().getTime();
   //let tableName = arg.container+':'+arg.folderIndex;
-  log.info('fileupload, arg = ',arg);
+  // log.info('fileupload, arg = ',arg);
   let tableName = arg.tablename;
 
   //kimcy error kt에서 응답이 null이 나와서 수정
@@ -1194,7 +1219,7 @@ var fileupload = function (arg){
 
         
         var bkzip = arg.data_backup;
-        console.log('bkzip = ', bkzip);
+        // console.log('bkzip = ', bkzip);
         if(bkzip != 'not-store'){
           localStorage.setItem('data_backup',bkzip).then(()=>{
             console.log('zip저장');
@@ -1385,6 +1410,7 @@ function zipProcess(selectedPath,resultElement,program_Pharm){
   // log.info('zip파일 시작 22',targetList1);
   let fileName = resultElement.fullpath;
   let filepath, target1, target2;
+  backupFolder_creSoty = selectedPath;
 
   if(program_Pharm =='ns_pharm'){
     let targetFile = fileName;

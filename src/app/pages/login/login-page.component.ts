@@ -67,18 +67,18 @@ export class LoginPageComponent implements OnInit {
         // request.get(options, function(err, resp, body) {
         request.post(options, function(err, resp, body) {
             if (err) {
-              log.error('11..로그인실패');
+              // log.error('11..로그인실패');
               reject(err);
             } else {
                 if(resp.statusCode == 200){
-                  log.info('login body = ',body);
+                  // log.info('login body = ',body);
                   var result = [];
                   result.push(body.token);
                   result.push(body.private);
                   result.push(body.noticeurgent);
                   result.push(body.nobackupdays);
                   result.push(body.limitsize);
-                  log.info('login result = ',result);
+                  // log.info('login result = ',result);
 
                   var option2 = {
                     uri: 'https://ssproxy.ucloudbiz.olleh.com/v1/AUTH_10b1107b-ce24-4cb4-a066-f46c53b474a3/'+username,
@@ -93,7 +93,7 @@ export class LoginPageComponent implements OnInit {
                       // log.info('container size res :',res);
                       // log.info('container size :',res.headers['x-container-bytes-used']);
                       result.push(res.headers['x-container-bytes-used']);
-                      log.info('login result = ',result);
+                      // log.info('login result = ',result);
                       resolve(result);
                     }else{
                       log.info('23..로그인 성공, but 컨테이터 사이즈 0');
@@ -106,7 +106,7 @@ export class LoginPageComponent implements OnInit {
                     }
                   })
                 }else{
-                  log.error('22..로그인실패');
+                  // log.error('22..로그인실패');
                   reject(resp.headers);
                 }
             }
@@ -115,7 +115,7 @@ export class LoginPageComponent implements OnInit {
   }
     
   onLoginB(member, popup, storage, router){
-    log.info("onLoginB, member = ", member);
+    // log.info("onLoginB, member = ", member);
     if(member.program == null || member.program == undefined || member.program == ""){
       storage.remove(member);
       let options = {
@@ -145,7 +145,7 @@ export class LoginPageComponent implements OnInit {
         router.navigateByUrl('/home');
 
     }, function(err) {
-        log.error(err);
+        log.error('Error in Login',err);
         storage.remove(member);
         let options = {
           message: '아이디, 비밀번호, 프로그램을 확인하세요'
@@ -156,7 +156,7 @@ export class LoginPageComponent implements OnInit {
 
   onLogin(username, password, program, popup) {
     //console.log('onLogin 22');
-    log.info('로그인 버튼 누름 , id =',username,'pw = ',password);
+    // log.info('로그인 버튼 누름 , id =',username,'pw = ',password);
 
     //로그인하고 토큰 재활용은 추후에..kimcy
     const member = new Member();
@@ -166,13 +166,13 @@ export class LoginPageComponent implements OnInit {
       member.password = this.password;
       member.program = this.program;
       popup = true;
-      log.info("111");
+      // log.info("111");
     } else {
       popup = false;
       member.username = username;
       member.password = password;
       member.program = program;
-      log.info("222");
+      // log.info("222");
     }
 
     this.onLoginB(member, false, this.storageService, this.router);
@@ -185,7 +185,7 @@ export class LoginPageComponent implements OnInit {
     /*---------------------------------------------------------------
          이전 버전 (v1.0.xx) 인지 체크
      --------------------------------------------------------------*/
-    console.log('login-page.component ');
+    // console.log('login-page.component ');
 
     setTimeout(() => {
       // let username = localStorage.getItem('username');
@@ -194,7 +194,7 @@ export class LoginPageComponent implements OnInit {
       let username, password, program;
 
       if(this.member === undefined){
-        console.log('처음실행 앱 안죽게');
+        // console.log('처음실행 앱 안죽게');
         return;
       }else{
         username = this.member.username;
@@ -207,9 +207,9 @@ export class LoginPageComponent implements OnInit {
         username = username.replace(/"/g, '').replace(/"/g, '');
         password = password.replace(/"/g, '').replace(/"/g, '');
 
-        console.log("11..oninit =>username :",username);
-        console.log("11..oninit =>password :",password);
-        console.log("11..oninit =>program :",program);
+        // console.log("11..oninit =>username :",username);
+        // console.log("11..oninit =>password :",password);
+        // console.log("11..oninit =>program :",program);
 
         this.migrating = false;
         this.migrateFromV1 = true;
