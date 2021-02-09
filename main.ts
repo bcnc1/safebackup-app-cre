@@ -488,6 +488,7 @@ function addFileFromDir(arg, window, callback){
     .on('ready', function() 
     { 
       log.info('Initial scan complete. Ready for changes.');
+      fileSort(result);
       log.info('result BEFORE ? = ', result);
       //log.info('tableName = ', tableName);
       
@@ -502,7 +503,7 @@ function addFileFromDir(arg, window, callback){
           let resultElement = result[resultLength-(i+1)];
           if(resultElement.fullpath.toLowerCase().lastIndexOf('mdf')>0){
             let fileName = resultElement.fullpath;
-            zipProcess(arg.path,fileName,program_Pharm);
+            zipProcess(arg.path,resultElement,program_Pharm);
             let newName1 = fileName.replace('mpharm_','');
             let newName2 = newName1.replace('.mdf','.zip');
             resultElement.fullpath = newName2;
@@ -520,11 +521,30 @@ function addFileFromDir(arg, window, callback){
           let resultElement = result[resultLength-(i+1)];
           if(resultElement.fullpath.toLowerCase().lastIndexOf('dmp')>0){
             let fileName = resultElement.fullpath;
-            zipProcess(arg.path,fileName,program_Pharm);
+            zipProcess(arg.path,resultElement,program_Pharm);
             let newName1 = fileName.replace('DB_','');
             let newName2 = newName1.replace('.DMP','.zip');
 
             resultElement.fullpath = newName2;
+            returnList.push(resultElement);
+            break;
+          }
+        }
+        result = returnList;
+      }else if(arg.folderIndex == 0 && program_Pharm =='u_pharm'){
+        let returnList = [];
+        let resultLength = result.length;
+
+        for(let i=0;i<resultLength;i++){
+          let resultElement = result[resultLength-(i+1)];
+          if(resultElement.fullpath.toLowerCase().lastIndexOf('bak')>0){
+            let fileName = resultElement.fullpath;
+            zipProcess(arg.path,resultElement,program_Pharm);
+            let newName1 = resultElement.updated;
+            let newName2 = formatDate(newName1);
+            let newName3 = arg.path + '/' + newName2 + '.zip';
+
+            resultElement.fullpath = newName3;
             returnList.push(resultElement);
             break;
           }
@@ -1360,10 +1380,12 @@ function createZipPharm(selectedPath, program_Pharm){
   
 }
 
-function zipProcess(selectedPath,fileName,program_Pharm){
+function zipProcess(selectedPath,resultElement,program_Pharm){
   
   // log.info('zip파일 시작 22',targetList1);
+  let fileName = resultElement.fullpath;
   let filepath, target1, target2;
+
   if(program_Pharm =='ns_pharm'){
     let targetFile = fileName;
     let a_Location = targetFile.toLowerCase().lastIndexOf('_');
@@ -1382,17 +1404,58 @@ function zipProcess(selectedPath,fileName,program_Pharm){
     target1 = targetFile;
     let target11 = target1.replace('.DMP','.sql');
     target2 = target11.replace('DB','MariaDB');
-    log.info('target2 in cn_pharm',target2);
+
+  }else if(program_Pharm == 'u_pharm'){
+    let splitFullPath = fileName.split('\\');
+    let splitFullPathLength = splitFullPath.length;
+    let targetFolder = splitFullPath[splitFullPathLength-2];
+
+    target1 = selectedPath + '/' + targetFolder;
+    let newName1 = resultElement.updated;
+    let newName2 = formatDate(newName1);
+    filepath = selectedPath + '/' + newName2 + '.zip'; 
   }
 
   try{
     if (!fs.existsSync(filepath)) { 
       var zip = new AdmZip();
-      zip.addLocalFile(target1);
-      zip.addLocalFile(target2);
-      zip.writeZip(filepath);
+      if(program_Pharm == 'cn_pharm' || program_Pharm =='ns_pharm'){
+        zip.addLocalFile(target1);
+        zip.addLocalFile(target2);
+        zip.writeZip(filepath);
+      }else if(program_Pharm == 'u_pharm'){
+        zipper.sync.zip(target1).compress().save(filepath);
+        // zip.addLocalFile(target1);
+        // zip.writeZip(filepath);
+      }
     } 
   }catch(e){
     log.info('error in zip process',e);
   }
+}
+
+function formatDate(date) {
+  var d = new Date(date),
+      month = '' + (d.getMonth() + 1),
+      day = '' + d.getDate(),
+      year = d.getFullYear();
+
+  if (month.length < 2) 
+      month = '0' + month;
+  if (day.length < 2) 
+      day = '0' + day;
+
+  return [year, month, day].join('-');
+}
+
+function fileSort(targetList){
+  targetList.sort(function(a, b) {
+    // let a = a.toLowerCase().lastIndexOf('_');
+    let s1 = a.updated;
+    // let bLocation = b.toLowerCase().lastIndexOf('_');
+    let s2 = b.updated;
+    if (s1 < s2) { return -1; }
+    if (s1 > s2) { return 1; }
+    return 0;
+  });
 }
