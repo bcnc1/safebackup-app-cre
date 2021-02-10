@@ -1446,13 +1446,38 @@ function zipProcess(selectedPath,resultElement,program_Pharm){
     if (!fs.existsSync(filepath)) { 
       var zip = new AdmZip();
       if(program_Pharm == 'cn_pharm' || program_Pharm =='ns_pharm'){
-        zip.addLocalFile(target1);
-        zip.addLocalFile(target2);
-        zip.writeZip(filepath);
+        if(program_Pharm == 'cn_pharm'){
+          let newTarget2 = target2.replace('sql','SQL');
+          if(fs.existsSync(target2)){
+            zip.addLocalFile(target1);
+            zip.addLocalFile(target2);
+            zip.writeZip(filepath);
+          }else if(fs.existsSync(newTarget2)){
+            zip.addLocalFile(target1);
+            zip.addLocalFile(newTarget2);
+            zip.writeZip(filepath);
+          }else{
+            zip.addLocalFile(target1);
+            zip.writeZip(filepath);
+          }
+        }
+        if(program_Pharm == 'ns_pharm'){
+          let newTarget2 = target2.replace('ldf','LDF');
+          if(fs.existsSync(target2)){
+            zip.addLocalFile(target1);
+            zip.addLocalFile(target2);
+            zip.writeZip(filepath);
+          }else if(fs.existsSync(newTarget2)){
+            zip.addLocalFile(target1);
+            zip.addLocalFile(newTarget2);
+            zip.writeZip(filepath);
+          }else{
+            zip.addLocalFile(target1);
+            zip.writeZip(filepath);
+          }
+        }
       }else if(program_Pharm == 'u_pharm'){
         zipper.sync.zip(target1).compress().save(filepath);
-        // zip.addLocalFile(target1);
-        // zip.writeZip(filepath);
       }
     } 
   }catch(e){
