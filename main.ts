@@ -49,6 +49,8 @@ let stopUploadFlag = false;
 let stopUploadInfo = new Object();
 
 let backupFolder_creSoty = '';
+let flagZipFileMade = false;
+let flagErrorNoFile = false;
 
 if (handleSquirrelEvent(app)) {
   // squirrel event handled and app will exit in 1000ms, so don't do anything else
@@ -964,9 +966,6 @@ var noBackupRead = function(member){
  -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 ipcMain.on('PCRESOURCE', (event, arg) => {
 
-  // mainWindow.minimize();
-  // log.warn('MINIMIZE main Window');
-
   // === START : after comparing cloud limit and size, show a window of warning
   localStorage.getItem('member').then((value) => {
     member = JSON.parse(value);
@@ -1024,14 +1023,10 @@ ipcMain.on('PCRESOURCE', (event, arg) => {
     //log.info('hostName in localstorage => ', value);
     if(value == undefined || value == null){
       localStorage.setItem('macaddress',macaddress).then(()=>{
-        //log.info(macaddress,'hostName localstorage 저장');
       });
     }else{
       macaddress = value;
-      //log.info('hostName from localstorage');
     }
-    //log.info('ipaddress = ',ipaddress);
-    // log.info('hostName = ',macaddress);
   
     if(mainWindow && !mainWindow.isDestroyed()){
       // log.info('보냄 main, PCRESOURCE',ipaddress,macaddress);
@@ -1118,6 +1113,18 @@ ipcMain.on('DELETE-ZIP-FILE', (event, arg) => {
 
 });
 
+ipcMain.on('Restart-Backup-Check', (event, arg) => {
+
+  // log.info('Restart-Backup-Check');
+  if(flagZipFileMade && flagErrorNoFile){
+    if(mainWindow && !mainWindow.isDestroyed()){
+      // log.info('보냄 main, PCRESOURCE',ipaddress,macaddress);
+      mainWindow.webContents.send("Restart-Backup-Service",null);
+    }
+  }
+  flagZipFileMade = false;
+  flagErrorNoFile = false;
+});
 
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
  *  chain upload
@@ -1216,7 +1223,6 @@ var fileupload = function (arg){
         console.log('업로드 성공');
         upload = null;
         r = null;
-
         
         var bkzip = arg.data_backup;
         // console.log('bkzip = ', bkzip);
@@ -1225,7 +1231,6 @@ var fileupload = function (arg){
             console.log('zip저장');
           });
         }
-
 
         knex(tableName)
         .where({id: arg.fileid})
@@ -1264,7 +1269,6 @@ var fileupload = function (arg){
     }
   }
 
-
   var options = {  
     method: 'PUT',
     uri: STORAGE_URL+'/'+arg.container+'/'+ encodeURI(arg.filename), 
@@ -1274,7 +1278,7 @@ var fileupload = function (arg){
     }
   };
 
-   try{
+  try{
     if(fs.existsSync(arg.filepath)){
       //파일이 존재함으로 업로드..
       upload = fs.createReadStream(arg.filepath,{highWaterMark : 256*1024});
@@ -1283,8 +1287,7 @@ var fileupload = function (arg){
     }else{
       //db목록에서 삭제
       log.info('파일없음으로 db목록에서 삭제: ',arg.filepath);
-      // log.info('tableName: ',tableName);
-      // var delId = arg.fileid;
+      flagErrorNoFile = true;
       knex(tableName)
         .where({id: arg.fileid})
         .del().then(()=>{
@@ -1293,9 +1296,9 @@ var fileupload = function (arg){
           }
         });
     }
-   } catch(err){
+  } catch(err){
     log.error('업로드 에러 : ',err);
-   }
+  }
 }
 
 function handleSquirrelEvent(application) {
@@ -1407,6 +1410,7 @@ function createZipPharm(selectedPath, program_Pharm){
 
 function zipProcess(selectedPath,resultElement,program_Pharm){
   
+  flagZipFileMade = true;
   // log.info('zip파일 시작 22',targetList1);
   let fileName = resultElement.fullpath;
   let filepath, target1, target2;

@@ -419,6 +419,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
         } else {
           log.info('homepage -> 모두완료 다음시간설정');
           this.electronService.ipcRenderer.send('DELETE-ZIP-FILE', null);
+          this.electronService.ipcRenderer.send('Restart-Backup-Check', null);
 
           this.uploading = false;
           //kimcy: test code
@@ -586,6 +587,13 @@ export class HomePageComponent implements OnInit, OnDestroy {
         }
       }
       this.ReadFolderInfo();
+    });
+
+
+    this.electronService.ipcRenderer.on('Restart-Backup-Service', (event: Electron.IpcMessageEvent, response: any) => {
+      // console.log('받음 home-page, PCRESOURCE, response = ',response);
+      log.info('Restart Backup Service in an hour');
+      setTimeout(this.onRetryUpload, 1000*60*60);
     });
 
 
