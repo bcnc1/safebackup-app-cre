@@ -426,8 +426,6 @@ export class UploadFiletreeService {
           });
 
           this.sendIndex++;
-         // log.info('44..업데이트 완료후 sendIndex = ',this.sendIndex);
-        //  log.info('44..this.changefilesToSend.length = ',this.changefilesToSend.length);
           if(this.changefilesToSend.length > this.sendIndex){
             this.uploadManager(this.changefilesToSend[this.sendIndex], "change-file");
           }else{

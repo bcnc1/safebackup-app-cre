@@ -1077,7 +1077,7 @@ ipcMain.on('DELETE-ZIP-FILE', (event, arg) => {
 
   log.info('Delete Zip files in backup folder');
   if(backupFolder_creSoty == ''){
-    log.info('Not a pharm program to delete files');
+    log.error('Not a pharm program to delete files');
   }else{
 
     let targetList1 = [];
@@ -1090,8 +1090,10 @@ ipcMain.on('DELETE-ZIP-FILE', (event, arg) => {
       }
       
       targetList1.sort(function(a, b) {
-        let s1 = fs.stats(a).ctime;
-        let s2 = fs.stats(b).ctime;
+        let s11 = fs.statSync(backupFolder_creSoty +'/'+a);
+        let s12 = fs.statSync(backupFolder_creSoty +'/'+b);
+        let s1 = s11.ctime;
+        let s2 = s12.ctime;
         if (s1 < s2) { return 1; }
         if (s1 > s2) { return -1; }
         return 0;
@@ -1100,10 +1102,12 @@ ipcMain.on('DELETE-ZIP-FILE', (event, arg) => {
       if(targetList1.length <= 3){
         log.error('None to delete');
       }else{
+        // log.info('targetList1',targetList1);
         for(var j=3;j<targetList1.length;j++){
-          fs.unlinkSync(backupFolder_creSoty +'/'+targetList1[i]);
+          // log.info('targetList1[i]',targetList1[j]);
+          fs.unlinkSync(backupFolder_creSoty +'/'+targetList1[j]);
         }
-        log.error('Backup 폴더 delete : Done');
+        log.info('Backup 폴더 delete : Done');
       }
     }catch(err){
       log.error('Backup 폴더 지우기 실패',err);
