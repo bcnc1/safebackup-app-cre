@@ -576,16 +576,35 @@ function addFileFromDir(arg, window, callback){
                   });
                 });
               }else{
-                knex(tableName)
-                .insert({filename: item.fullpath, filesize : item.size, 
-                  fileupdate: item.updated, uploadstatus: 0, chainstatus: 0})
-                .then(()=>{
-                  localStorage.getItem('member').then((value) => {
-                    if(value != null){
-                     next();
-                    }
-                  });
-                });
+                // zip 예측크기에 따라 wait time을 부여 (약간 주먹구구식)
+                let waitTime = 0;
+                if(item.size >= 500*1024*1024 && item.fullpath.lastIndexOf('.zip') > 0){
+                  waitTime = 1000*60*5;
+                }else if(item.size >= 200*1024*1024 && item.fullpath.lastIndexOf('.zip') > 0){
+                  waitTime = 1000*60*2;
+                }
+                setTimeout(()=>{
+                    knex(tableName)
+                    .insert({filename: item.fullpath, filesize : item.size, 
+                      fileupdate: item.updated, uploadstatus: 0, chainstatus: 0})
+                    .then(()=>{
+                      localStorage.getItem('member').then((value) => {
+                        if(value != null){
+                        next();
+                        }
+                      });
+                    })
+                  }, waitTime);
+                // knex(tableName)
+                // .insert({filename: item.fullpath, filesize : item.size, 
+                //   fileupdate: item.updated, uploadstatus: 0, chainstatus: 0})
+                // .then(()=>{
+                //   localStorage.getItem('member').then((value) => {
+                //     if(value != null){
+                //      next();
+                //     }
+                //   });
+                // });
               }
               
             }else{
