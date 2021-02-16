@@ -999,8 +999,9 @@ ipcMain.on('PCRESOURCE', (event, arg) => {
     program_Pharm = member.program;
     let limitsize = Number(member.limitsize);
     let currentsize = Number(member.currentsize);
-    log.info('cloud size(Gb)', limitsize, currentsize/1000000000);
-    limitsize = limitsize * 1024 * 1024 * 1024;
+    currentsize = Math.round(currentsize / (1024*1024*1024));
+    log.info('cloud size(Gb)', limitsize, currentsize);
+    // limitsize = limitsize * 1024 * 1024 * 1024;
     if(currentsize >= limitsize){
       creatWarnWindow();
       stopUploadFlag = true;
