@@ -60,10 +60,10 @@ if (handleSquirrelEvent(app)) {
 
 let mainWindow;
 
-var drBackupAutoLauncher = new AutoLaunch({
+var cresotyBackupAutoLauncher = new AutoLaunch({
   name: 'creSotybackup'
 });
-drBackupAutoLauncher.enable();
+cresotyBackupAutoLauncher.enable();
 
 /* 글로벌로 해야  garbage colllection이 안된다고함 */
 let tray = null;
@@ -81,7 +81,7 @@ function createWindow() {
   /*---------------------------------------------------------------
                TRAY
    ----------------------------------------------------------------*/
-  tray = new Tray(path.join(__dirname, '/dist/assets/icons/tray-icon.png'));
+  tray = new Tray(path.join(__dirname, '/dist/assets/icons/tray-icon2.png'));
   contextMenu = Menu.buildFromTemplate([
     {
       label: '보기',
@@ -99,7 +99,7 @@ function createWindow() {
     }
   ]);
 
-  tray.setToolTip(SF_json.version);
+  tray.setToolTip('크레소티백업');
   tray.setContextMenu(contextMenu);
 
   tray.on('click', function (e) {
@@ -358,6 +358,13 @@ try {
     }
   });
 
+  cresotyBackupAutoLauncher.isEnabled().then((enabled) => {
+    if (enabled) return;
+    return cresotyBackupAutoLauncher.enable()
+  }).catch((e) => {
+    log.error('Auto-Launcher Error',e);
+  });
+
 } catch (e) {
   // Catch Error
   // throw e;
@@ -577,34 +584,34 @@ function addFileFromDir(arg, window, callback){
                 });
               }else{
                 // zip 예측크기에 따라 wait time을 부여 (약간 주먹구구식)
-                let waitTime = 0;
-                if(item.size >= 500*1024*1024 && item.fullpath.lastIndexOf('.zip') > 0){
-                  waitTime = 1000*60*5;
-                }else if(item.size >= 200*1024*1024 && item.fullpath.lastIndexOf('.zip') > 0){
-                  waitTime = 1000*60*2;
-                }
-                setTimeout(()=>{
-                    knex(tableName)
-                    .insert({filename: item.fullpath, filesize : item.size, 
-                      fileupdate: item.updated, uploadstatus: 0, chainstatus: 0})
-                    .then(()=>{
-                      localStorage.getItem('member').then((value) => {
-                        if(value != null){
-                        next();
-                        }
-                      });
-                    })
-                  }, waitTime);
-                // knex(tableName)
-                // .insert({filename: item.fullpath, filesize : item.size, 
-                //   fileupdate: item.updated, uploadstatus: 0, chainstatus: 0})
-                // .then(()=>{
-                //   localStorage.getItem('member').then((value) => {
-                //     if(value != null){
-                //      next();
-                //     }
-                //   });
-                // });
+                // let waitTime = 0;
+                // if(item.size >= 500*1024*1024 && item.fullpath.lastIndexOf('.zip') > 0){
+                //   waitTime = 1000*60*5;
+                // }else if(item.size >= 200*1024*1024 && item.fullpath.lastIndexOf('.zip') > 0){
+                //   waitTime = 1000*60*2;
+                // }
+                // setTimeout(()=>{
+                //     knex(tableName)
+                //     .insert({filename: item.fullpath, filesize : item.size, 
+                //       fileupdate: item.updated, uploadstatus: 0, chainstatus: 0})
+                //     .then(()=>{
+                //       localStorage.getItem('member').then((value) => {
+                //         if(value != null){
+                //         next();
+                //         }
+                //       });
+                //     })
+                //   }, waitTime);
+                knex(tableName)
+                .insert({filename: item.fullpath, filesize : item.size, 
+                  fileupdate: item.updated, uploadstatus: 0, chainstatus: 0})
+                .then(()=>{
+                  localStorage.getItem('member').then((value) => {
+                    if(value != null){
+                     next();
+                    }
+                  });
+                });
               }
               
             }else{
@@ -1138,7 +1145,7 @@ ipcMain.on('DELETE-ZIP-FILE', (event, arg) => {
 
 ipcMain.on('Restart-Backup-Check', (event, arg) => {
 
-  // log.info('Restart-Backup-Check');
+  log.info('Restart-Backup-Check');
   if(flagZipFileMade && flagErrorNoFile){
     if(mainWindow && !mainWindow.isDestroyed()){
       // log.info('보냄 main, PCRESOURCE',ipaddress,macaddress);
@@ -1433,6 +1440,8 @@ function createZipPharm(selectedPath, program_Pharm){
 
 function zipProcess(selectedPath,resultElement,program_Pharm){
   
+  log.info('zip process start');
+  
   flagZipFileMade = true;
   // log.info('zip파일 시작 22',targetList1);
   let fileName = resultElement.fullpath;
@@ -1447,7 +1456,7 @@ function zipProcess(selectedPath,resultElement,program_Pharm){
     filepath = selectedPath + '/' + s1 + ".zip";
     target1 = targetFile;
     target2 = target1.replace('.mdf','.ldf');
-
+    log.info('zip process start === 2');
   }else if(program_Pharm == 'cn_pharm'){
     let targetFile = fileName;
     let a_Location = targetFile.toLowerCase().lastIndexOf('_');
@@ -1489,6 +1498,7 @@ function zipProcess(selectedPath,resultElement,program_Pharm){
           }
         }
         if(program_Pharm == 'ns_pharm'){
+          log.info('zip process start === 3');
           let newTarget2 = target2.replace('ldf','LDF');
           if(fs.existsSync(target2)){
             zip.addLocalFile(target1);
@@ -1508,7 +1518,7 @@ function zipProcess(selectedPath,resultElement,program_Pharm){
       }
     } 
   }catch(e){
-    log.info('error in zip process',e);
+    log.error('error in zip process',e);
   }
 }
 
