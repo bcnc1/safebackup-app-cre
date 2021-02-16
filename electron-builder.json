@@ -22,7 +22,7 @@
         "!tslint.json"
     ],
     "win": {
-      "icon": "build/favicon.png",
+      "icon": "build/favicon2.png",
       "target": [
         {
           "target": "nsis",
