@@ -451,13 +451,13 @@ export class HomePageComponent implements OnInit, OnDestroy {
               // log.info('업로드 완료 후 this.member = > ', this.member);
 
               if(this.member.noticeurgent){
-                log.info('call => getUrgentNotice');
+                // log.info('call => getUrgentNotice');
                 this.memberAPI.getUrgentNotice(this.member,this.storageService, (response) =>{
                   
                   if(response){
-                    var urgent = this.storageService.get('urgent');
-                    log.info('urgent = ',urgent);
-                    this.electronService.ipcRenderer.send('ALERT-URGENT', {message: urgent.message, title: urgent.title});
+                    // var urgent = this.storageService.get('urgent');
+                    // log.info('urgent = ',urgent);
+                    // this.electronService.ipcRenderer.send('ALERT-URGENT', {message: urgent.message, title: urgent.title});
                   }
                 });
                 
@@ -465,8 +465,8 @@ export class HomePageComponent implements OnInit, OnDestroy {
                 this.memberAPI.getBackupDays(this.member,this.storageService, (response) =>{
                   
                   if(response){
-                    var backupdays = this.storageService.get('backupday');
-                    this.electronService.ipcRenderer.send('ALERT-BACKUP', {message: backupdays.message, title: backupdays.title});
+                    // var backupdays = this.storageService.get('backupday');
+                    // this.electronService.ipcRenderer.send('ALERT-BACKUP', {message: backupdays.message, title: backupdays.title});
                   }
                 });
               }
