@@ -147,10 +147,17 @@ export class UploadFiletreeService {
         this.chainsToSend = [];
   
         for(let i =0; i<fileTree.length; i++){
+          let fileName = '';
+          if(this.folderIndex == 0){
+            fileName = this.deviceResource.macaddress+'-SVC0-'+'/'+fileTree[i]['filename'].replace(/\\/g, '/')
+          }else{
+            fileName = this.deviceResource.macaddress+'/'+fileTree[i]['filename'].replace(/\\/g, '/')
+          }
           this.chainsToSend.push({
             fileid:fileTree[i]['id'],
             folderIndex: this.folderIndex,
-            file: this.deviceResource.macaddress+'/'+fileTree[i]['filename'].replace(/\\/g, '/'),
+            // file: this.deviceResource.macaddress+'/'+fileTree[i]['filename'].replace(/\\/g, '/'),
+            file:fileName,
             filepath: fileTree[i]['filename'].replace(/\\/g, '/'),
             filesize: fileTree[i]['filesize'],
             tableName: fileTree[i]['tbName']
@@ -227,10 +234,17 @@ export class UploadFiletreeService {
       this.addfilesToSend = [];
 
       for(let i =0; i<fileTree.length; i++){
+        let fileName = '';
+        if(this.folderIndex == 0){
+          fileName = this.deviceResource.macaddress+'-SVC0-'+'/'+fileTree[i]['filename'].replace(/\\/g, '/')
+        }else{
+          fileName = this.deviceResource.macaddress+'/'+fileTree[i]['filename'].replace(/\\/g, '/')
+        }
         this.addfilesToSend.push({
           fileid:fileTree[i]['id'],
           folderIndex: this.folderIndex,
-          file: this.deviceResource.macaddress+'/'+fileTree[i]['filename'].replace(/\\/g, '/'),
+          // file: this.deviceResource.macaddress+'/'+fileTree[i]['filename'].replace(/\\/g, '/'),
+          file:fileName,
           filepath:fileTree[i]['filename'].replace(/\\/g, '/'),
           filesize:fileTree[i]['filesize'],
           tableName: fileTree[i]['tbName']
@@ -381,10 +395,16 @@ export class UploadFiletreeService {
       this.changefilesToSend = [];
 
       for(let i =0; i<fileTree.length; i++){
+        let fileName = '';
+        if(this.folderIndex == 0){
+          fileName = this.deviceResource.macaddress+'-SVC0-'+'/'+fileTree[i]['filename'].replace(/\\/g, '/')
+        }else{
+          fileName = this.deviceResource.macaddress+'/'+fileTree[i]['filename'].replace(/\\/g, '/')
+        }
         this.changefilesToSend.push({
           fileid:fileTree[i]['id'],
           folderIndex: this.folderIndex,
-          file: this.deviceResource.macaddress+'/'+fileTree[i]['filename'].replace(/\\/g, '/'),
+          file: fileName,
           filepath:fileTree[i]['filename'].replace(/\\/g, '/'),
           filesize:fileTree[i]['filesize'],
           tableName: fileTree[i]['tbName']
