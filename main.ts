@@ -23,7 +23,7 @@ const Menu = require('electron').Menu;
 const dialog = electron.dialog;
 const log = require('electron-log');
 const updater = require('electron-simple-updater');
-// const { autoUpdater } = require("electron-updater")
+const { autoUpdater } = require("electron-updater")
 const SF_json = require('./package.json');
 //kimcy
 const reqestProm = require('request-promise-native')
@@ -197,37 +197,37 @@ function createWindow() {
    /*---------------------------------------------------------------
     Auto Updater
     ----------------------------------------------------------------*/
-    // autoUpdater.checkForUpdates();
-    // autoUpdater.on('checking-for-update', () => {
-    //   log.info("checking-for-update");
-    // });
-    // autoUpdater.on('update-available', (info) => {
-    //   log.info("update-available");
-    // });
-    // autoUpdater.on('update-not-available', (info) => {
-    //   log.info("update-not-available");
-    // });
-    // autoUpdater.on('error', (err) => {
-    //   log.info("error = ",err);
-    // });
-    // autoUpdater.on('download-progress', (progressObj) => {
-    //   log.info("download-progress");
-    // });
-    // autoUpdater.on('update-downloaded', (info) => {
-    //   log.info("update-downloaded = ",info);
-      // isOpenDialog = true;
-      // const dialogOpts = {
-      //   title:'Application Update',
-      //   message: '새 업데이트 버전이 있습니다.',
-      //   type: "info"
-      // }
-      // dialog.showMessageBox(dialogOpts,(returnValue)=>{
-      //   if(returnValue === 0) {
-      //     isOpenDialog = false;
-      //     autoUpdater.quitAndInstall();  
-      //   }
-      // });
-    // });
+    autoUpdater.checkForUpdates();
+    autoUpdater.on('checking-for-update', () => {
+      log.info("checking-for-update");
+    });
+    autoUpdater.on('update-available', (info) => {
+      log.info("update-available");
+    });
+    autoUpdater.on('update-not-available', (info) => {
+      log.info("update-not-available");
+    });
+    autoUpdater.on('error', (err) => {
+      log.info("error = ",err);
+    });
+    autoUpdater.on('download-progress', (progressObj) => {
+      log.info("download-progress");
+    });
+    autoUpdater.on('update-downloaded', (info) => {
+      log.info("update-downloaded = ",info);
+      isOpenDialog = true;
+      const dialogOpts = {
+        title:'Application Update',
+        message: '새 업데이트 버전이 있습니다.',
+        type: "info"
+      }
+      dialog.showMessageBox(dialogOpts,(returnValue)=>{
+        if(returnValue === 0) {
+          isOpenDialog = false;
+          autoUpdater.quitAndInstall();  
+        }
+      });
+    });
 
 }
 

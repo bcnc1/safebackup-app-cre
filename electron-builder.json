@@ -23,6 +23,14 @@
     ],
     "win": {
       "icon": "build/favicon2.png",
+      "publish": [
+        {
+          "provider": "github",
+          "owner": "bcnc1",
+          "repo": "CreSoty.Update",
+          "releaseType": "release"
+        }
+      ],
       "target": [
         {
           "target": "nsis",
