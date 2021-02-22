@@ -1,6 +1,6 @@
 {
- "productName": "CreSotyBackup",
- "appId": "com.doctorkeeper.cresotybackup",
+ "productName": "PharmpaySmartBackup",
+ "appId": "com.doctorkeeper.PharmpaySmartBackup",
   "directories": {
     "buildResources":"build/",
     "output": "release/"
