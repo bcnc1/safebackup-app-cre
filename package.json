@@ -1,13 +1,9 @@
 {
-  "name": "CreSotyBackup",
-  "productName": "CreSotyBackup",
-  "publishedName": "CreSoty with BC&Company",
+  "name": "PharmpaySmartBackup",
+  "productName": "PharmpaySmartBackup",
+  "publishedName": "PharmpaySmartBackup",
   "version": "0.0.1",
-  "description": "CreSotyBackup with KT Cloud",
-  "author": {
-    "name": "BC&Company",
-    "email": "bcncompany1@gmail.com"
-  },
+  "description": "PharmpaySmartBackup",
   "keywords": [
     "angular",
     "angular 8",
@@ -101,6 +97,7 @@
     "angular-font-awesome": "^3.1.2",
     "angular-notifier": "^4.1.1",
     "angular-pipes": "^9.0.2",
+    "archiver": "^5.2.0",
     "async": "^3.1.0",
     "auto-launch": "^5.0.5",
     "bootstrap": "^4.3.1",
