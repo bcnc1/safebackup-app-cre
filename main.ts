@@ -69,8 +69,8 @@ cresotyBackupAutoLauncher.enable();
 let tray = null;
 let contextMenu = null;
 
-let folderOption1Path = "c:\\cresoty_backup\\option1.json";
-let initOptionPath = "c:\\cresoty_backup\\init.json";
+let folderOption1Path = "c:\\smartbackup\\option1.json";
+let initOptionPath = "c:\\smartbackup\\init.json";
 
 let firstInstall = false;
 let program_Pharm = "";
@@ -99,7 +99,7 @@ function createWindow() {
     }
   ]);
 
-  tray.setToolTip('크레소티백업');
+  tray.setToolTip('팜페이 스마트백업');
   tray.setContextMenu(contextMenu);
 
   tray.on('click', function (e) {
