@@ -5,7 +5,7 @@
     "buildResources":"build/",
     "output": "release/"
   },
-    "files": [
+  "files": [
         "**/*",
         "!**/*.ts",
         "!*.code-workspace",
@@ -20,8 +20,8 @@
         "!karma.conf.js",
         "!tsconfig.json",
         "!tslint.json"
-    ],
-    "win": {
+  ],
+  "win": {
       "icon": "build/favicon2.png",
       "publish": [
         {
@@ -39,7 +39,7 @@
           ]
         }
       ]
-    },
+  },
   "mac": {
     "icon": "dist",
     "target": [
@@ -51,5 +51,8 @@
     "target": [
       "AppImage"
     ]
-  }
+  },
+  "extraFiles":[
+    "extraResources/"
+  ]
 }

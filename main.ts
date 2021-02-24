@@ -7,6 +7,7 @@ import { createInjectable } from "@angular/compiler/src/core";
 import { userInfo } from "os";
 import { LoggerConfig } from "ngx-logger";
 import * as moment from 'moment';
+
 const {app, BrowserWindow, ipcMain} = require("electron");
 const fs = require("fs");
 const url = require("url");
@@ -23,10 +24,10 @@ const Menu = require('electron').Menu;
 const dialog = electron.dialog;
 const log = require('electron-log');
 const updater = require('electron-simple-updater');
-const { autoUpdater } = require("electron-updater")
+const { autoUpdater } = require("electron-updater");
 const SF_json = require('./package.json');
 //kimcy
-const reqestProm = require('request-promise-native')
+const reqestProm = require('request-promise-native');
 var AutoLaunch = require('auto-launch');
 const chokidar = require('chokidar');
 
@@ -74,6 +75,8 @@ let initOptionPath = "c:\\smartbackup\\init.json";
 
 let firstInstall = false;
 let program_Pharm = "";
+
+var exec = require('child_process').execFile;
 
 function createWindow() {
   // console.log('createWindow');
@@ -366,6 +369,7 @@ try {
   });
 
 } catch (e) {
+  log.info('Main Process Error',e)
   // Catch Error
   // throw e;
 }
@@ -1515,11 +1519,26 @@ function zipProcess(selectedPath,resultElement,program_Pharm){
           }
         }
       }else if(program_Pharm == 'u_pharm'){
-        zipper.sync.zip(target1).compress().save(filepath);
+        // zipper.sync.zip(target1).compress().save(filepath);
+        log.info('zip 1:',target1);
+        log.info('zip 2:',filepath);        
+        exec('c:\\smartbackup\\extraResources\\7za', ['a', filepath, target1], function(err, data) {
+          //console.log(err)
+          log.info('zip result:',data);
+        });
+
+        // exec('bz', ['c','-v:1024MB', filepath, target1], function(err, data) {
+        //   //console.log(err)
+        //   log.info('zip result:',data);
+        // });
+        // var task = spawn(_7z, ['a','-v:1024MB', filepath, target1]);
+        // task.on('close', function (code) {
+        //   log.info('child process exited ', code);
+        // })
       }
     } 
   }catch(e){
-    log.error('error in zip process',e);
+    log.error('error in zip process:',e);
   }
 }
 
