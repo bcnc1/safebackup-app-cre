@@ -150,7 +150,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
   }
 
   onRequestFolderData(folderIndex) {
-    console.log('home-page, onRequestFolderData');
+    // console.log('home-page, onRequestFolderData');
     console.log('this.deviceResource ',this.deviceResource);
     if (this.deviceResource == null) {
       this.deviceResource = { macaddress: 'MAC' };
@@ -418,6 +418,11 @@ export class HomePageComponent implements OnInit, OnDestroy {
           this.onStartUploadFolder(message.folderIndex , 5);
         } else {
           log.info('homepage -> 모두완료 다음시간설정');
+
+          // let top = '팜페이 스마트백업'
+          // let msg = '팜페이 스마트백업에서 백업파일 업로드 작업을 완료하였습니다';
+          // this.electronService.ipcRenderer.send('ALERT', {message: msg, title: top});
+          this.electronService.ipcRenderer.send('Upload-Complete-Notice', null);
           this.electronService.ipcRenderer.send('DELETE-ZIP-FILE', null);
           this.electronService.ipcRenderer.send('Restart-Backup-Check', null);
 
@@ -558,6 +563,11 @@ export class HomePageComponent implements OnInit, OnDestroy {
     this.electronService.ipcRenderer.on('PCRESOURCE', (event: Electron.IpcMessageEvent, response: any) => {
       // console.log('받음 home-page, PCRESOURCE, response = ',response);
       this.deviceResource = response;
+      let userName = response.userName;
+      let folderKey = this.getFolderKey(1);
+      this.storageService.set(folderKey, "C:\\Users\\"+userName+"\\AppData\\LocalLow\\NPKI");
+      // console.log('folder 1',"C:\\Users\\"+userName+"\\AppData\\LocalLow\\NPKI");
+      this.ReadFolderInfo();
     });
 
 
@@ -579,7 +589,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
         this.fillFolders();
 
         //this.uploadFiletreeService.fillFollders(); 현재는 폴더인덱스만 있으면 됨
-        console.log('home-page, uploading?? ', this.uploading)
+        // console.log('home-page, uploading?? ', this.uploading)
         if (this.uploading === false) {
           //log.info('home-page, SELECTFOLDER ?? folderIndex = ', response.folderIndex)
           this.storageService.set('login',false); 

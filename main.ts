@@ -254,6 +254,30 @@ function creatWarnWindow() {
   );
 }
 
+function create_Notice_Upload_Complete_Window(){
+  const windowNotice = new BrowserWindow({ 
+    width: 300, 
+    height: 200,
+    webPreferences: {
+      nodeIntegration: true,
+      webSecurity: false
+    },
+    autoHideMenuBar: true
+  })
+
+  windowNotice.loadURL(
+    url.format({
+      pathname: path.join(__dirname, `/dist/assets/noticeUpload.html`),
+      protocol: "file:",
+      slashes: true
+    })
+  );
+
+  setTimeout(function () {
+    windowNotice.destroy();
+  }, 5000);
+}
+
 function showMainWindow(){
   mainWindow.show();
 }
@@ -500,11 +524,19 @@ function addFileFromDir(arg, window, callback){
           let resultElement = result[resultLength-(i+1)];
           if(resultElement.fullpath.toLowerCase().lastIndexOf('mdf')>0){
             let fileName = resultElement.fullpath;
-            zipProcess(arg.path,resultElement,program_Pharm);
+            // zipProcess(arg.path,resultElement,program_Pharm);
             let newName1 = fileName.replace('mpharm_','');
             let newName2 = newName1.replace('.mdf','.zip');
-            resultElement.fullpath = newName2;
-            returnList.push(resultElement);
+
+            if (fs.existsSync(newName2)) { 
+              resultElement.fullpath = newName2;
+              returnList.push(resultElement);
+            }else{
+              zipProcess(arg.path,resultElement,program_Pharm);
+            }
+
+            // resultElement.fullpath = newName2;
+            // returnList.push(resultElement);
             break;
           }
         }
@@ -518,12 +550,19 @@ function addFileFromDir(arg, window, callback){
           let resultElement = result[resultLength-(i+1)];
           if(resultElement.fullpath.toLowerCase().lastIndexOf('dmp')>0){
             let fileName = resultElement.fullpath;
-            zipProcess(arg.path,resultElement,program_Pharm);
+            // zipProcess(arg.path,resultElement,program_Pharm);
             let newName1 = fileName.replace('DB_','');
             let newName2 = newName1.replace('.DMP','.zip');
 
-            resultElement.fullpath = newName2;
-            returnList.push(resultElement);
+            if (fs.existsSync(newName2)) { 
+              resultElement.fullpath = newName2;
+              returnList.push(resultElement);
+            }else{
+              zipProcess(arg.path,resultElement,program_Pharm);
+            }
+
+            // resultElement.fullpath = newName2;
+            // returnList.push(resultElement);
             break;
           }
         }
@@ -535,14 +574,16 @@ function addFileFromDir(arg, window, callback){
         for(let i=0;i<resultLength;i++){
           let resultElement = result[resultLength-(i+1)];
           if(resultElement.fullpath.toLowerCase().lastIndexOf('bak')>0){
-            let fileName = resultElement.fullpath;
-            zipProcess(arg.path,resultElement,program_Pharm);
+            // let fileName = resultElement.fullpath;
             let newName1 = resultElement.updated;
             let newName2 = formatDate(newName1);
             let newName3 = arg.path + '/' + newName2 + '.zip';
-
-            resultElement.fullpath = newName3;
-            returnList.push(resultElement);
+            if (fs.existsSync(newName3)) { 
+              resultElement.fullpath = newName3;
+              returnList.push(resultElement);
+            }else{
+              zipProcess(arg.path,resultElement,program_Pharm);
+            }
             break;
           }
         }
@@ -1026,6 +1067,10 @@ ipcMain.on('PCRESOURCE', (event, arg) => {
 
   let hostName = os.hostname();
   log.info('hostName =>',hostName);
+  
+  let userName = os.userInfo().username;
+  log.info('userName =>',userName);
+  // pcUserName = userName;
 
   var maps = Object.keys(interfaces)
     .map(x => interfaces[x].filter(x => x.family === 'IPv4' && !x.internal)[0])
@@ -1064,7 +1109,8 @@ ipcMain.on('PCRESOURCE', (event, arg) => {
       mainWindow.webContents.send("PCRESOURCE", {
         ipaddresses: maps,
         ipaddress: ipaddress,
-        macaddress: macaddress
+        macaddress: macaddress,
+        userName: userName
       });
     }
   
@@ -1076,9 +1122,7 @@ ipcMain.on('SELECTFOLDER', (event, arg) => {
   //console.log('받음,main, SELECTFOLDER');
   var directory = dialog.showOpenDialog(mainWindow, {
     properties: ['openDirectory']
-
   });
-
 
   if(mainWindow && !mainWindow.isDestroyed()){
     
@@ -1160,6 +1204,12 @@ ipcMain.on('Restart-Backup-Check', (event, arg) => {
   flagZipFileMade = false;
   flagErrorNoFile = false;
 });
+
+ipcMain.on('Upload-Complete-Notice', (event, arg) => {
+  log.info('Upload-Complete-Notice');
+  create_Notice_Upload_Complete_Window();
+});
+
 
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
  *  chain upload
@@ -1407,42 +1457,6 @@ function handleSquirrelEvent(application) {
   }
 };
 
-function createZipPharm(selectedPath, program_Pharm){
-
-  let targetList1 = [];
-  try{
-    var files = fs.readdirSync(selectedPath);
-    for(var i in files) {
-      if(files[i].toLowerCase().lastIndexOf('.mdf') > 0){
-        targetList1.push(files[i]);
-      }
-    }
-    // 파일리스트 최신순으로 정렬
-    targetList1.sort(function(a, b) {
-      let aLocation = a.toLowerCase().lastIndexOf('_');
-      let s1 = Number(a.substr(aLocation+1,10));
-      let bLocation = b.toLowerCase().lastIndexOf('_');
-      let s2 = Number(b.substr(bLocation+1,10));
-      if (s1 < s2) { return 1; }
-      if (s1 > s2) { return -1; }
-      return 0;
-    });
-  }catch(err){
-    log.error('Backup 폴더정보 읽기 실패');
-  }
-  
-  let transferList = [];
-  // if(firstInstall){
-    transferList = targetList1.slice(0,3);
-  // }else{
-  //   transferList = targetList1.slice(0,1);
-  // }
-  // zipper.sync.zip(selectedPath).compress().save(filepath);
-  // log.info('zip파일 시작 11',firstInstall);
-  zipProcess(selectedPath,transferList,program_Pharm);
-  
-}
-
 function zipProcess(selectedPath,resultElement,program_Pharm){
   
   log.info('zip process start');
@@ -1490,38 +1504,56 @@ function zipProcess(selectedPath,resultElement,program_Pharm){
         if(program_Pharm == 'cn_pharm'){
           let newTarget2 = target2.replace('sql','SQL');
           if(fs.existsSync(target2)){
-            zip.addLocalFile(target1);
-            zip.addLocalFile(target2);
-            zip.writeZip(filepath);
+            // zip.addLocalFile(target1);
+            // zip.addLocalFile(target2);
+            // zip.writeZip(filepath);
+            exec('c:\\smartbackup\\extraResources\\7za', ['a', filepath, target1, target2], function(err, data) {
+              log.info('zip result:',data);
+            });
           }else if(fs.existsSync(newTarget2)){
-            zip.addLocalFile(target1);
-            zip.addLocalFile(newTarget2);
-            zip.writeZip(filepath);
+            // zip.addLocalFile(target1);
+            // zip.addLocalFile(newTarget2);
+            // zip.writeZip(filepath);
+            exec('c:\\smartbackup\\extraResources\\7za', ['a', filepath, target1, newTarget2], function(err, data) {
+              log.info('zip result:',data);
+            });
           }else{
-            zip.addLocalFile(target1);
-            zip.writeZip(filepath);
+            // zip.addLocalFile(target1);
+            // zip.writeZip(filepath);
+            exec('c:\\smartbackup\\extraResources\\7za', ['a', filepath, target1], function(err, data) {
+              log.info('zip result:',data);
+            });
           }
         }
         if(program_Pharm == 'ns_pharm'){
           log.info('zip process start === 3');
           let newTarget2 = target2.replace('ldf','LDF');
           if(fs.existsSync(target2)){
-            zip.addLocalFile(target1);
-            zip.addLocalFile(target2);
-            zip.writeZip(filepath);
+            // zip.addLocalFile(target1);
+            // zip.addLocalFile(target2);
+            // zip.writeZip(filepath);
+            exec('c:\\smartbackup\\extraResources\\7za', ['a', filepath, target1, target2], function(err, data) {
+              log.info('zip result:',data);
+            });
           }else if(fs.existsSync(newTarget2)){
-            zip.addLocalFile(target1);
-            zip.addLocalFile(newTarget2);
-            zip.writeZip(filepath);
+            // zip.addLocalFile(target1);
+            // zip.addLocalFile(newTarget2);
+            // zip.writeZip(filepath);
+            exec('c:\\smartbackup\\extraResources\\7za', ['a', filepath, target1, newTarget2], function(err, data) {
+              log.info('zip result:',data);
+            });
           }else{
-            zip.addLocalFile(target1);
-            zip.writeZip(filepath);
+            // zip.addLocalFile(target1);
+            // zip.writeZip(filepath);
+            exec('c:\\smartbackup\\extraResources\\7za', ['a', filepath, target1], function(err, data) {
+              log.info('zip result:',data);
+            });
           }
         }
       }else if(program_Pharm == 'u_pharm'){
         // zipper.sync.zip(target1).compress().save(filepath);
-        log.info('zip 1:',target1);
-        log.info('zip 2:',filepath);        
+        // log.info('zip 1:',target1);
+        // log.info('zip 2:',filepath);        
         exec('c:\\smartbackup\\extraResources\\7za', ['a', filepath, target1], function(err, data) {
           //console.log(err)
           log.info('zip result:',data);
