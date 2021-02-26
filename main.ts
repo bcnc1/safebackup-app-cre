@@ -96,7 +96,6 @@ function createWindow() {
       label: '종료',
       click: function () {
         isQuiting = true;
-        // console.log('트레이종료');
         app.quit();
       }
     }
@@ -106,10 +105,12 @@ function createWindow() {
   tray.setContextMenu(contextMenu);
 
   tray.on('click', function (e) {
-    setTimeout(function () {
-      mainWindow.minimize();
-    }, 3000);
+    // setTimeout(function () {
+    //   mainWindow.minimize();
+    // }, 3000);
+    mainWindow.show();
   });
+
   contextMenu.on('menu-will-close', (event) => {
     for (let item of event.sender.items) {
       if (item.checked) log.warn("Menu item checked:", item.label)
@@ -119,7 +120,6 @@ function createWindow() {
    /*---------------------------------------------------------------
               Main Window
     ----------------------------------------------------------------*/
-
   mainWindow = new BrowserWindow({
     width: 800,
     height: 400,
@@ -139,16 +139,18 @@ function createWindow() {
   );
  
    //kimcy: release 할때는 해당 부부을 false, 개발할때는 true
-  function isDev() {
-    return false;
-  };
+  // function isDev() {
+  //   return false;
+  // };
  
    // The following is optional and will open the DevTools:
-  if (isDev()) {
-    mainWindow.webContents.openDevTools();
-  } else {
+  // if (isDev()) {
+  //   mainWindow.webContents.openDevTools();
+  // } else {
     //kimcy: 3초후에 사라지게 요청
+    log.info('firstInstall in createWindow',firstInstall);
     if(firstInstall){
+      log.info('mainWindow.show()');
       mainWindow.show();
     }else{
       mainWindow.hide();
@@ -158,7 +160,7 @@ function createWindow() {
     //   mainWindow.minimize();
     //   log.warn('MINIMIZE');
     // }, 3000);
-  }
+  // }
  
   app.on('before-quit', function (e) {
     // Handle menu-item or keyboard shortcut quit here
@@ -257,7 +259,7 @@ function creatWarnWindow() {
 function create_Notice_Upload_Complete_Window(){
   const windowNotice = new BrowserWindow({ 
     width: 300, 
-    height: 200,
+    height: 220,
     webPreferences: {
       nodeIntegration: true,
       webSecurity: false
@@ -284,7 +286,6 @@ function showMainWindow(){
 
 try {
 
-
   const gotTheLock = app.requestSingleInstanceLock()
 
   if (!gotTheLock) {
@@ -309,6 +310,7 @@ try {
       }else{
         localStorage.clear();
         localStorage.removeItem('member');
+        // localStorage.removeItem('data_backup');
         log.info('First install');
         firstInstall = true;
         let obj = {
@@ -337,7 +339,6 @@ try {
     });
   }
 
-
   // Quit when all windows are closed.
   // kimcy 강제종료는 tray에서만 하는것으로??
   app.on('window-all-closed', () => {
@@ -348,7 +349,7 @@ try {
       if (isQuiting == true) {
         isQuiting = false;
       } else {
-        mainWindow.hide();
+        // mainWindow.hide();
         isQuiting = false;
       }
   
@@ -410,23 +411,23 @@ function createSBDatabBase(){
       // console.log('does not');
       var db = new sqlite3.Database(app.getPath('userData')+'/'+ 'sb.db');
       db.close();
-
     }
-
-   });
+  });
   
 }
 
 function initDataBackup(){
-  localStorage.getItem('data_backup').then((value) => {
-    // log.info('initDataBackup => ', value);
-    //log.info('initDataBackup => ', typeof value);
-    if(value == undefined){
-      localStorage.setItem('data_backup',"undefined").then(()=>{
-        // log.info('undefine 저장');
-      });
-    }
-  });
+  // if(firstInstall){
+  //   localStorage.setItem('data_backup',"undefined").then(()=>{
+  //   });
+  // }else{
+    localStorage.getItem('data_backup').then((value) => {
+      if(value == undefined){
+        localStorage.setItem('data_backup',"undefined").then(()=>{
+        });
+      }
+    });
+  // }
   
 }
 
@@ -628,25 +629,6 @@ function addFileFromDir(arg, window, callback){
                   });
                 });
               }else{
-                // zip 예측크기에 따라 wait time을 부여 (약간 주먹구구식)
-                // let waitTime = 0;
-                // if(item.size >= 500*1024*1024 && item.fullpath.lastIndexOf('.zip') > 0){
-                //   waitTime = 1000*60*5;
-                // }else if(item.size >= 200*1024*1024 && item.fullpath.lastIndexOf('.zip') > 0){
-                //   waitTime = 1000*60*2;
-                // }
-                // setTimeout(()=>{
-                //     knex(tableName)
-                //     .insert({filename: item.fullpath, filesize : item.size, 
-                //       fileupdate: item.updated, uploadstatus: 0, chainstatus: 0})
-                //     .then(()=>{
-                //       localStorage.getItem('member').then((value) => {
-                //         if(value != null){
-                //         next();
-                //         }
-                //       });
-                //     })
-                //   }, waitTime);
                 knex(tableName)
                 .insert({filename: item.fullpath, filesize : item.size, 
                   fileupdate: item.updated, uploadstatus: 0, chainstatus: 0})
@@ -1083,38 +1065,37 @@ ipcMain.on('PCRESOURCE', (event, arg) => {
     macaddress = hostName;
   }
 
-  localStorage.getItem('ipaddress').then((value) => {
-    //log.info('ipaddress in localstorage => ', value);
-    if(value == undefined || value == null){
-      localStorage.setItem('ipaddress',ipaddress).then(()=>{
-        //log.info(ipaddress,'ipaddress localstorage 저장');
-      });
-    }else{
-      ipaddress = value;
-      //log.info('ipaddress from localstorage');
-    }
-  });
-
-  localStorage.getItem('macaddress').then((value) => {
-    //log.info('hostName in localstorage => ', value);
-    if(value == undefined || value == null){
-      localStorage.setItem('macaddress',macaddress).then(()=>{
-      });
-    }else{
-      macaddress = value;
-    }
+    // localStorage.getItem('ipaddress').then((value) => {
+    //   //log.info('ipaddress in localstorage => ', value);
+    //   if(value == undefined || value == null){
+    //     localStorage.setItem('ipaddress',ipaddress).then(()=>{
+    //       //log.info(ipaddress,'ipaddress localstorage 저장');
+    //     });
+    //   }else{
+    //     ipaddress = value;
+    //     //log.info('ipaddress from localstorage');
+    //   }
+    // });
   
-    if(mainWindow && !mainWindow.isDestroyed()){
-      // log.info('보냄 main, PCRESOURCE',ipaddress,macaddress);
-      mainWindow.webContents.send("PCRESOURCE", {
-        ipaddresses: maps,
-        ipaddress: ipaddress,
-        macaddress: macaddress,
-        userName: userName
-      });
-    }
-  
-  });
+    // localStorage.getItem('macaddress').then((value) => {
+    //   //log.info('hostName in localstorage => ', value);
+    //   if(value == undefined || value == null){
+    //     localStorage.setItem('macaddress',macaddress).then(()=>{
+    //     });
+    //   }else{
+    //     macaddress = value;
+    //   }
+    
+      if(mainWindow && !mainWindow.isDestroyed()){
+        // log.info('보냄 main, PCRESOURCE',ipaddress,macaddress);
+        mainWindow.webContents.send("PCRESOURCE", {
+          ipaddresses: maps,
+          ipaddress: ipaddress,
+          macaddress: macaddress,
+          userName: userName
+        });
+      }
+    // });
 
 });
 
@@ -1475,7 +1456,7 @@ function zipProcess(selectedPath,resultElement,program_Pharm){
     filepath = selectedPath + '/' + s1 + ".zip";
     target1 = targetFile;
     target2 = target1.replace('.mdf','.ldf');
-    log.info('zip process start === 2');
+    // log.info('zip process start === 2');
   }else if(program_Pharm == 'cn_pharm'){
     let targetFile = fileName;
     let a_Location = targetFile.toLowerCase().lastIndexOf('_');
@@ -1526,7 +1507,7 @@ function zipProcess(selectedPath,resultElement,program_Pharm){
           }
         }
         if(program_Pharm == 'ns_pharm'){
-          log.info('zip process start === 3');
+          // log.info('zip process start === 3');
           let newTarget2 = target2.replace('ldf','LDF');
           if(fs.existsSync(target2)){
             // zip.addLocalFile(target1);
@@ -1555,7 +1536,6 @@ function zipProcess(selectedPath,resultElement,program_Pharm){
         // log.info('zip 1:',target1);
         // log.info('zip 2:',filepath);        
         exec('c:\\smartbackup\\extraResources\\7za', ['a', filepath, target1], function(err, data) {
-          //console.log(err)
           log.info('zip result:',data);
         });
 

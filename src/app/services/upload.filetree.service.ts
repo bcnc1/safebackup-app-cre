@@ -612,7 +612,7 @@ export class UploadFiletreeService {
         }
        }else{ 
          var filename = this.storageService.get('data_backup',StorageTranscoders.STRING)
-         log.info('filename = ',typeof filename);
+        //  log.info('filename = ',typeof filename);
          log.info('filename = ', filename);
          if(filename != "undefined" ){
           log.info('업로드된 zip 있음 ');
@@ -662,8 +662,8 @@ export class UploadFiletreeService {
       // console.log('파일업로딩 ',size.toFixed(2));
       this.notification.next({
         cmd: 'SENDING.STARTED',
-        message: '[' + (item.folderIndex + 1) + '] ' + item.filepath + ' 업로딩...' + size.toFixed(2) +'KB'
-
+        // message: '[' + (item.folderIndex + 1) + '] ' + item.filepath + ' 업로딩...' + size.toFixed(2) +'KB'
+        message: '[' + (item.folderIndex + 1) + '] ' + item.filepath + ' 업로딩...'
       });
     }
   }
