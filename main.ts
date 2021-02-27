@@ -308,11 +308,15 @@ try {
         createSBDatabBase();
         initDataBackup();
       }else{
+        firstInstall = true;
+        createWindow();
         localStorage.clear();
         localStorage.removeItem('member');
+        // localStorage.setItem('member',"undefined");
         // localStorage.removeItem('data_backup');
         log.info('First install');
-        firstInstall = true;
+        log.info('localStorage.getItem',localStorage.getItem('member'));
+        // firstInstall = true;
         let obj = {
           'first':'YES'
         };
@@ -320,7 +324,7 @@ try {
           if (err) return log.error(err);
         });
         setTimeout(function(){
-          createWindow();
+          // createWindow();
           createSBDatabBase();
           initDataBackup();
         },2000)
@@ -340,7 +344,6 @@ try {
   }
 
   // Quit when all windows are closed.
-  // kimcy 강제종료는 tray에서만 하는것으로??
   app.on('window-all-closed', () => {
     // On OS X it is common for applications and their menu bar
     // to stay active until the user quits explicitly with Cmd + Q
@@ -402,9 +405,12 @@ try {
 var sqlite3 = require('sqlite3').verbose();
  
 function createSBDatabBase(){
+  
   localStorage.getItem('member').then((value) => {
-    member = JSON.parse(value);
     
+    member = JSON.parse(value);
+    log.info('createSBDatabBase > member',member);
+
     if (fs.existsSync(app.getPath('userData')+'/'+ 'sb.db')) {
       // console.log('exists');
     } else{
@@ -417,17 +423,13 @@ function createSBDatabBase(){
 }
 
 function initDataBackup(){
-  // if(firstInstall){
-  //   localStorage.setItem('data_backup',"undefined").then(()=>{
-  //   });
-  // }else{
+
     localStorage.getItem('data_backup').then((value) => {
       if(value == undefined){
         localStorage.setItem('data_backup',"undefined").then(()=>{
         });
       }
     });
-  // }
   
 }
 
@@ -760,9 +762,7 @@ function createNPKIzip(selectedPath, username){
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
  *  IPC : ADD-ZIPFILE
  -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
-//  ipcMain.on("ADD-ZIPFILE", (event, arg) => {
 
-//  });
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
  *  IPC : REQ-UPDATETREE
  -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
@@ -1035,7 +1035,7 @@ ipcMain.on('PCRESOURCE', (event, arg) => {
       stopUploadInfo['limitsize'] = limitsize;
       stopUploadInfo['currentsize'] = currentsize;
     }
-    //log.info('PCRESOURCE > member',member);
+    log.info('PCRESOURCE > member',member);
   });
   // === END : after comparing cloud limit and size, show a window of warning
 
