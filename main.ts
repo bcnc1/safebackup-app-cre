@@ -19,6 +19,7 @@ const { localStorage, sessionStorage } = require('electron-browser-storage');
 // const checkDiskSpace = require("check-disk-space");
 const request = require('request');
 const electron = require('electron');
+// const screen = require('electron');
 const Tray = require('electron').Tray;
 const Menu = require('electron').Menu;
 const dialog = electron.dialog;
@@ -75,6 +76,7 @@ let initOptionPath = "c:\\smartbackup\\init.json";
 
 let firstInstall = false;
 let program_Pharm = "";
+let screenSize;
 
 var exec = require('child_process').execFile;
 
@@ -137,30 +139,14 @@ function createWindow() {
       slashes: true
     })
   );
- 
-   //kimcy: release 할때는 해당 부부을 false, 개발할때는 true
-  // function isDev() {
-  //   return false;
-  // };
- 
-   // The following is optional and will open the DevTools:
-  // if (isDev()) {
-  //   mainWindow.webContents.openDevTools();
-  // } else {
-    //kimcy: 3초후에 사라지게 요청
+    
     log.info('firstInstall in createWindow',firstInstall);
     if(firstInstall){
       log.info('mainWindow.show()');
       mainWindow.show();
     }else{
       mainWindow.hide();
-      // log.warn('Hide main Window');
     }
-    // setTimeout(function () {
-    //   mainWindow.minimize();
-    //   log.warn('MINIMIZE');
-    // }, 3000);
-  // }
  
   app.on('before-quit', function (e) {
     // Handle menu-item or keyboard shortcut quit here
@@ -260,6 +246,8 @@ function create_Notice_Upload_Complete_Window(){
   const windowNotice = new BrowserWindow({ 
     width: 300, 
     height: 220,
+    x:screenSize.width-300,
+    y:screenSize.height-220,
     webPreferences: {
       nodeIntegration: true,
       webSecurity: false
@@ -277,7 +265,7 @@ function create_Notice_Upload_Complete_Window(){
 
   setTimeout(function () {
     windowNotice.destroy();
-  }, 5000);
+  }, 3000);
 }
 
 function showMainWindow(){
@@ -340,6 +328,10 @@ try {
           if (err) return log.error(err);
         });
       }
+
+      screenSize = electron.screen.getPrimaryDisplay().workAreaSize;
+      // log.info('screenSize',screenSize);
+
     });
   }
 
