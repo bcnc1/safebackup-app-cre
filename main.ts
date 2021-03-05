@@ -71,8 +71,8 @@ cresotyBackupAutoLauncher.enable();
 let tray = null;
 let contextMenu = null;
 
-let folderOption1Path = "c:\\smartbackup\\option1.json";
-let initOptionPath = "c:\\smartbackup\\init.json";
+let folderOption1Path = "c:\\PharmpaySmartBackup\\option1.json";
+let initOptionPath = "c:\\PharmpaySmartBackup\\init.json";
 
 let firstInstall = false;
 let program_Pharm = "";
