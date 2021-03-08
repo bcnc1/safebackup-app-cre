@@ -54,6 +54,8 @@ let backupFolder_creSoty = '';
 let flagZipFileMade = false;
 let flagErrorNoFile = false;
 
+var iconv = require("iconv-lite");
+
 if (handleSquirrelEvent(app)) {
   // squirrel event handled and app will exit in 1000ms, so don't do anything else
   // app.exit(0); 
@@ -321,7 +323,7 @@ try {
       if (!fs.existsSync(folderOption1Path)) {
         let obj = {
           'optionFor1Folder_IncludeSubFolder':'YES',
-          'optionFor2Folder_IncludeSubFolder':'YES',
+          'optionFor2Folder_IncludeSubFolder':'NO',
           'optionFor3Folder_IncludeSubFolder':'YES'
         };
         fs.writeFile(folderOption1Path, JSON.stringify(obj,null,2), function writeJSON(err) {
@@ -1040,6 +1042,8 @@ ipcMain.on('PCRESOURCE', (event, arg) => {
   //log.info('interfaces = ',interfaces);
 
   let hostName = os.hostname();
+  // log.info('hostName before =>',hostName);
+  hostName = iconv.decode(hostName, "euc-kr");
   log.info('hostName =>',hostName);
   
   let userName = os.userInfo().username;

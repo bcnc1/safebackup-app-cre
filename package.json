@@ -116,6 +116,7 @@
     "fs": "0.0.1-security",
     "get-folder-size": "^2.0.1",
     "getmac": "^1.4.6",
+    "iconv-lite": "^0.6.2",
     "jquery": "^3.4.1",
     "knex": "^0.19.4",
     "moment": "^2.24.0",
