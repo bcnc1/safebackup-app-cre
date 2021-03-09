@@ -527,6 +527,9 @@ function addFileFromDir(arg, window, callback){
 
             if (fs.existsSync(newName2)) { 
               resultElement.fullpath = newName2;
+              let stats = fs.statSync(newName2);
+              let fileSizeInBytes = stats.size;
+              resultElement.size = fileSizeInBytes;
               returnList.push(resultElement);
             }else{
               zipProcess(arg.path,resultElement,program_Pharm);
@@ -553,6 +556,9 @@ function addFileFromDir(arg, window, callback){
 
             if (fs.existsSync(newName2)) { 
               resultElement.fullpath = newName2;
+              let stats = fs.statSync(newName2);
+              let fileSizeInBytes = stats.size;
+              resultElement.size = fileSizeInBytes;
               returnList.push(resultElement);
             }else{
               zipProcess(arg.path,resultElement,program_Pharm);
@@ -577,6 +583,9 @@ function addFileFromDir(arg, window, callback){
             let newName3 = arg.path + '/' + newName2 + '.zip';
             if (fs.existsSync(newName3)) { 
               resultElement.fullpath = newName3;
+              let stats = fs.statSync(newName3);
+              let fileSizeInBytes = stats.size;
+              resultElement.size = fileSizeInBytes;
               returnList.push(resultElement);
             }else{
               zipProcess(arg.path,resultElement,program_Pharm);
@@ -612,7 +621,7 @@ function addFileFromDir(arg, window, callback){
           .then((results)=>{
             if(results.length == 0 ){
               //log.info('22..일치하는 값 없음 = results = ', results);
-              //5g이상은 업로드로 처리
+              //5기가 이상 파일은 업로드로 처리
               if(item.size >= MaxByte){
                   knex(tableName)
                 .insert({filename: item.fullpath, filesize : item.size, 
@@ -768,7 +777,7 @@ ipcMain.on("REQ-UPDATETREE", (event, arg) => {
     knex(tableName).where({
       uploadstatus: 2
     }).then((results)=>{
-      log.info(' 조회 결과  = ', results);
+      // log.info(' 조회 결과  = ', results);
 
       results.forEach(function(element){
         element.tbName = tableName;
@@ -795,7 +804,7 @@ ipcMain.on("REQ-UPLOADTREE", (event, arg) => {
       results.forEach(function(element){
         element.tbName = tableName;
       });
-      //log.info(' UPLOADTREE, 조회 결과  = ', results);
+      // log.info(' UPLOADTREE, 조회 결과  = ', results);
       if(mainWindow && !mainWindow.isDestroyed()){
         //log.info('보냄 UPLOADTREE, main ');
         mainWindow.webContents.send("UPLOADTREE", {tree:results});
@@ -1029,7 +1038,7 @@ ipcMain.on('PCRESOURCE', (event, arg) => {
       stopUploadInfo['limitsize'] = limitsize;
       stopUploadInfo['currentsize'] = currentsize;
     }
-    log.info('PCRESOURCE > member',member);
+    // log.info('PCRESOURCE > member',member);
   });
   // === END : after comparing cloud limit and size, show a window of warning
 
