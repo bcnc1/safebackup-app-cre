@@ -73,8 +73,9 @@ cresotyBackupAutoLauncher.enable();
 let tray = null;
 let contextMenu = null;
 
-let folderOption1Path = "c:\\PharmpaySmartBackup\\option1.json";
-let initOptionPath = "c:\\PharmpaySmartBackup\\init.json";
+let installFolder = "c:\\PharmpaySmartBackup";
+let folderOption1Path = installFolder+"\\option1.json";
+let initOptionPath = installFolder+"\\init.json";
 
 let firstInstall = false;
 let program_Pharm = "";
@@ -1493,20 +1494,20 @@ function zipProcess(selectedPath,resultElement,program_Pharm){
             // zip.addLocalFile(target1);
             // zip.addLocalFile(target2);
             // zip.writeZip(filepath);
-            exec('c:\\smartbackup\\extraResources\\7za', ['a', filepath, target1, target2], function(err, data) {
+            exec(installFolder+'\\extra\\7za', ['a', filepath, target1, target2], function(err, data) {
               log.info('zip result:',data);
             });
           }else if(fs.existsSync(newTarget2)){
             // zip.addLocalFile(target1);
             // zip.addLocalFile(newTarget2);
             // zip.writeZip(filepath);
-            exec('c:\\smartbackup\\extraResources\\7za', ['a', filepath, target1, newTarget2], function(err, data) {
+            exec(installFolder+'\\extra\\7za', ['a', filepath, target1, newTarget2], function(err, data) {
               log.info('zip result:',data);
             });
           }else{
             // zip.addLocalFile(target1);
             // zip.writeZip(filepath);
-            exec('c:\\smartbackup\\extraResources\\7za', ['a', filepath, target1], function(err, data) {
+            exec(installFolder+'\\extra\\7za', ['a', filepath, target1], function(err, data) {
               log.info('zip result:',data);
             });
           }
@@ -1518,20 +1519,20 @@ function zipProcess(selectedPath,resultElement,program_Pharm){
             // zip.addLocalFile(target1);
             // zip.addLocalFile(target2);
             // zip.writeZip(filepath);
-            exec('c:\\smartbackup\\extraResources\\7za', ['a', filepath, target1, target2], function(err, data) {
+            exec(installFolder+'\\extra\\7za', ['a', filepath, target1, target2], function(err, data) {
               log.info('zip result:',data);
             });
           }else if(fs.existsSync(newTarget2)){
             // zip.addLocalFile(target1);
             // zip.addLocalFile(newTarget2);
             // zip.writeZip(filepath);
-            exec('c:\\smartbackup\\extraResources\\7za', ['a', filepath, target1, newTarget2], function(err, data) {
+            exec(installFolder+'\\extra\\7za', ['a', filepath, target1, newTarget2], function(err, data) {
               log.info('zip result:',data);
             });
           }else{
             // zip.addLocalFile(target1);
             // zip.writeZip(filepath);
-            exec('c:\\smartbackup\\extraResources\\7za', ['a', filepath, target1], function(err, data) {
+            exec(installFolder+'\\extra\\7za', ['a', filepath, target1], function(err, data) {
               log.info('zip result:',data);
             });
           }
@@ -1539,8 +1540,12 @@ function zipProcess(selectedPath,resultElement,program_Pharm){
       }else if(program_Pharm == 'u_pharm'){
         // zipper.sync.zip(target1).compress().save(filepath);
         // log.info('zip 1:',target1);
-        // log.info('zip 2:',filepath);        
-        exec('c:\\smartbackup\\extraResources\\7za', ['a', filepath, target1], function(err, data) {
+        // log.info('zip 2:',filepath);   
+        // C:\PharmpaySmartBackup\extraResources    
+        // C:\pharmpayBackup\extra
+        // C:\smartBackup\extraResources
+        exec(installFolder+'\\extra\\7za', ['a', filepath, target1], function(err, data) {
+          if(err) log.error('zip err:',err);
           log.info('zip result:',data);
         });
 
