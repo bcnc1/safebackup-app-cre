@@ -517,6 +517,8 @@ function addFileFromDir(arg, window, callback){
       if(arg.folderIndex == 0 && program_Pharm=='ns_pharm'){
         let returnList = [];
         let resultLength = result.length;
+        let zipNameFlag = '';
+        let zipNameFlag2 = false;
 
         for(let i=0;i<resultLength;i++){
           let resultElement = result[resultLength-(i+1)];
@@ -524,21 +526,34 @@ function addFileFromDir(arg, window, callback){
             let fileName = resultElement.fullpath;
             // zipProcess(arg.path,resultElement,program_Pharm);
             let newName1 = fileName.replace('mpharm_','');
-            let newName2 = newName1.replace('.mdf','.zip');
+            let newName2 = newName1.replace('.mdf','.zip.001');
 
             if (fs.existsSync(newName2)) { 
-              resultElement.fullpath = newName2;
-              let stats = fs.statSync(newName2);
-              let fileSizeInBytes = stats.size;
-              resultElement.size = fileSizeInBytes;
-              returnList.push(resultElement);
+              // resultElement.fullpath = newName2;
+              // let stats = fs.statSync(newName2);
+              // let fileSizeInBytes = stats.size;
+              // resultElement.size = fileSizeInBytes;
+              // returnList.push(resultElement);
+              let temp1 = newName2.replace('.001','');
+              let temp2 = temp1.split('\\');
+              let temp3 = temp2.length;
+              zipNameFlag = temp2[temp3-1];
+              zipNameFlag2 = true;
             }else{
               zipProcess(arg.path,resultElement,program_Pharm);
             }
-
             // resultElement.fullpath = newName2;
             // returnList.push(resultElement);
             break;
+          }
+        }
+        log.info('zipNameFlag = ', zipNameFlag);
+        if(zipNameFlag2){
+          for(let i=0;i<resultLength;i++){
+            let resultElement = result[resultLength-(i+1)];
+            if(resultElement.fullpath.toLowerCase().lastIndexOf(zipNameFlag)>0){
+              returnList.push(resultElement);
+            }
           }
         }
         result = returnList;
@@ -1491,22 +1506,14 @@ function zipProcess(selectedPath,resultElement,program_Pharm){
         if(program_Pharm == 'cn_pharm'){
           let newTarget2 = target2.replace('sql','SQL');
           if(fs.existsSync(target2)){
-            // zip.addLocalFile(target1);
-            // zip.addLocalFile(target2);
-            // zip.writeZip(filepath);
             exec(installFolder+'\\extra\\7za', ['a', filepath, target1, target2], function(err, data) {
               log.info('zip result:',data);
             });
           }else if(fs.existsSync(newTarget2)){
-            // zip.addLocalFile(target1);
-            // zip.addLocalFile(newTarget2);
-            // zip.writeZip(filepath);
             exec(installFolder+'\\extra\\7za', ['a', filepath, target1, newTarget2], function(err, data) {
               log.info('zip result:',data);
             });
           }else{
-            // zip.addLocalFile(target1);
-            // zip.writeZip(filepath);
             exec(installFolder+'\\extra\\7za', ['a', filepath, target1], function(err, data) {
               log.info('zip result:',data);
             });
@@ -1516,34 +1523,23 @@ function zipProcess(selectedPath,resultElement,program_Pharm){
           // log.info('zip process start === 3');
           let newTarget2 = target2.replace('ldf','LDF');
           if(fs.existsSync(target2)){
-            // zip.addLocalFile(target1);
-            // zip.addLocalFile(target2);
-            // zip.writeZip(filepath);
-            exec(installFolder+'\\extra\\7za', ['a', filepath, target1, target2], function(err, data) {
+            exec(installFolder+'\\extra\\7za', ['a','-v1024m', filepath, target1, target2], function(err, data) {
+            // exec(installFolder+'\\extra\\7za', ['a', filepath, target1, target2], function(err, data) {
               log.info('zip result:',data);
             });
           }else if(fs.existsSync(newTarget2)){
-            // zip.addLocalFile(target1);
-            // zip.addLocalFile(newTarget2);
-            // zip.writeZip(filepath);
-            exec(installFolder+'\\extra\\7za', ['a', filepath, target1, newTarget2], function(err, data) {
+            exec(installFolder+'\\extra\\7za', ['a','-v1024m', filepath, target1, newTarget2], function(err, data) {
+            // exec(installFolder+'\\extra\\7za', ['a', filepath, target1, newTarget2], function(err, data) {
               log.info('zip result:',data);
             });
           }else{
-            // zip.addLocalFile(target1);
-            // zip.writeZip(filepath);
-            exec(installFolder+'\\extra\\7za', ['a', filepath, target1], function(err, data) {
+            exec(installFolder+'\\extra\\7za', ['a','-v1024m', filepath, target1], function(err, data) {
+            // exec(installFolder+'\\extra\\7za', ['a', filepath, target1], function(err, data) {
               log.info('zip result:',data);
             });
           }
         }
       }else if(program_Pharm == 'u_pharm'){
-        // zipper.sync.zip(target1).compress().save(filepath);
-        // log.info('zip 1:',target1);
-        // log.info('zip 2:',filepath);   
-        // C:\PharmpaySmartBackup\extraResources    
-        // C:\pharmpayBackup\extra
-        // C:\smartBackup\extraResources
         exec(installFolder+'\\extra\\7za', ['a', filepath, target1], function(err, data) {
           if(err) log.error('zip err:',err);
           log.info('zip result:',data);
