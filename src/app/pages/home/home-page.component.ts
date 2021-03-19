@@ -13,6 +13,9 @@ import { ObjectUtils } from '../../utils/ObjectUtils';
 import { NGXLogger } from 'ngx-logger';
 import { environment } from '../../../environments/environment';
 import { fstat } from 'fs';
+
+import * as schedule from "node-schedule";
+
 const log = require('electron-log');
 const fs = require('fs');
 
@@ -304,15 +307,12 @@ export class HomePageComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    // console.log('home-page, ngOnInit');
     this.version = environment.VERSION;
     this.electronService.ipcRenderer.send('PCRESOURCE', null);
-    // console.log('보냄 home-page, PCRESOURCE');
     
     this.member = this.memberAPI.isLoggedin();
     this.memberPrivate = this.member.private;
 
-    //console.log('memberPrivate = ', this.memberPrivate);
     this.pharmProgram = this.member.program;
     switch(this.pharmProgram) {
       case "pharm_3000":
@@ -346,36 +346,9 @@ export class HomePageComponent implements OnInit, OnDestroy {
       this.storageService.set('maxfolder', this.maxFolder); 
     }
 
-    // //30일 점검
-    // if(!this.memberPrivate && this.checkDay(30)){
-    //   var top = '[팜베이스] 안심백업'
-    //   var msg = '[위험]최근 30일간 백업된 파일이 없습니다.\nPIT3000 백업후 종료해 주세요.';
-    //   this.electronService.ipcRenderer.send('ALERT', {message: msg, title: top});
-    // }
-    
-    // else if(!this.memberPrivate && this.checkDay(15)){
-    //   var top = '[팜베이스] 안심백업'
-    //   var msg = '[경고]최근 15일간 백업된 파일이 없습니다.\nPIT3000 백업후 종료해 주세요.';
-    //   this.electronService.ipcRenderer.send('ALERT', {message: msg, title: top});
-    // }
-    
-    // else if(!this.memberPrivate && this.checkDay(7)){
-    //   var top = '[팜베이스] 안심백업'
-    //   var msg = '[주의]최근 7일간 백업된 파일이 없습니다.\nPIT3000 백업후 종료해 주세요.';
-    //   this.electronService.ipcRenderer.send('ALERT', {message: msg, title: top});
-    // }
-    // //긴급점검 체크
-    // else if(!this.memberPrivate && this.checkEmergency()){
-    //   var top = '[팜베이스] 안심백업'
-    //   var msg = '긴급점검! 백업된 파일이 없습니다.\nPIT3000 백업후 종료해 주세요.';
-    //   this.electronService.ipcRenderer.send('ALERT', {message: msg, title: top});
-    // }
-    
-
     function getRandomInt(min, max) {
       return Math.floor(Math.random() * (max - min + 1)) + min;
     }
-
 
     /*---------------------------------------------------------------
            Subscribe to notification
@@ -407,10 +380,9 @@ export class HomePageComponent implements OnInit, OnDestroy {
         /*---------------------------------------------------------------
               폴더 전송 완료
          ----------------------------------------------------------------*/
-        console.log('homepage -> 폴더전송완료');
+        // console.log('homepage -> 폴더전송완료');
         //this.logger.debug(new Date(), message);
         log.info('전송완료된 폴더 folderIndex : ', (message.folderIndex -1), );
-
 
         if(message.folderIndex < this.maxFolder){
           log.info('다음폴더 업로드 !!');
@@ -428,6 +400,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
 
           this.uploading = false;
           //kimcy: test code
+
           const minutes =  60 * getRandomInt(5, 7); 
           const interval = 1000 * 60 * minutes;
           const next = moment().add(interval);
@@ -478,52 +451,13 @@ export class HomePageComponent implements OnInit, OnDestroy {
             }
           }); //업로드 완료 후 토큰 갱신
           
-          //this.member = this.storageService.get('member');
-          //log.info('업로드 완료 후 this.member = > ', this.member);
-          // if(this.member.noticeurgent){
-          //   log.info('call => getUrgentNotice');
-          //   this.memberAPI.getUrgentNotice(this.member,this.storageService, (response) =>{
-              
-          //     if(response){
-          //       var urgent = this.storageService.get('urgent');
-          //       log.info('urgent = ',urgent);
-          //       this.electronService.ipcRenderer.send('ALERT-URGENT', {message: urgent.message, title: urgent.title});
-          //     }
-          //   });
-            
-          // } else if(this.member.nobackupdays > 0){
-
-          // }
-          // //30일 점검
-          // if(!this.memberPrivate && this.checkDay(30)){
-          //   var top = '[팜베이스] 안심백업'
-          //   var msg = '[위험]최근 30일간 백업된 파일이 없습니다.\nPIT3000 백업후 종료해 주세요.';
-          //   this.electronService.ipcRenderer.send('ALERT', {message: msg, title: top});
-          // }
-          
-          // else if(!this.memberPrivate && this.checkDay(15)){
-          //   var top = '[팜베이스] 안심백업'
-          //   var msg = '[경고]최근 15일간 백업된 파일이 없습니다.\nPIT3000 백업후 종료해 주세요.';
-          //   this.electronService.ipcRenderer.send('ALERT', {message: msg, title: top});
-          // }
-          
-          // else if(!this.memberPrivate && this.checkDay(7)){
-          //   var top = '[팜베이스] 안심백업'
-          //   var msg = '[주의]최근 7일간 백업된 파일이 없습니다.\nPIT3000 백업후 종료해 주세요.';
-          //   this.electronService.ipcRenderer.send('ALERT', {message: msg, title: top});
-          // }
-          // //긴급점검 체크
-          // else if(!this.memberPrivate && this.checkEmergency()){
-          //   var top = '[팜베이스] 안심백업'
-          //   var msg = '긴급점검! 백업된 파일이 없습니다.\n프로그램에서 백업버튼을 눌러주세요.';
-          //   this.electronService.ipcRenderer.send('ALERT', {message: msg, title: top});
-          // }
-
-          this.onStartUploadFolder(0, interval / 1000);
+          if(this.member.program!='ns_pharm'){
+            this.onStartUploadFolder(0, interval / 1000);
+          }
+          // this.onStartUploadFolder(0, interval / 1000);
         }
       }
     });
-
 
     /*---------------------------------------------------------------
      * Storage로부터 값을 받아와서  this.storedFolders를 초기화
@@ -531,30 +465,42 @@ export class HomePageComponent implements OnInit, OnDestroy {
     ----------------------------------------------------------------*/
     this.fillFolders(); //??
 
-
     /*---------------------------------------------------------------
            등록된 폴더에 대해 업로드를 실행  
            맨처음 로그인하고 불림(1번만)
      ----------------------------------------------------------------*/
     this.timerStart = setTimeout(() => {
-        
-        // console.log('10초후 등록된 폴더에 대해 업로드를 실행 ??');
+      log.info('this.timerStart start');
         if(this.storageService.get('login') == true){
-            for (let i = 0; i < this.maxFolder; i++) {
+          for (let i = 0; i < this.maxFolder; i++) {
             this.uploading = false;
-            console.log('storedFolders = ',this.storedFolders[i]);
+            // console.log('storedFolders = ',this.storedFolders[i]);
             if (this.storedFolders[i] != undefined) {
-              console.log('등록된 폴더에 대해 업로드를 실행', this.storedFolders[i].length); //폴더의 이름 길이
-              console.log('home-page, member = ', this.member);
+              // console.log('등록된 폴더에 대해 업로드를 실행', this.storedFolders[i].length); //폴더의 이름 길이
+              // console.log('home-page, member = ', this.member);
               //this.uploadFiletreeService.upload(i, this.storedFolders[i]);
               //this.uploadFiletreeService.getFolderTree(i, this.storedFolders[i],this.member);
-              this.onStartUploadFolder(i, 2);
+
+              if(this.member.program!='ns_pharm'){
+                this.onStartUploadFolder(i, 2);
+              }else{
+                log.info('NS-Pharm inside this.timerStart');
+                var rule = new schedule.RecurrenceRule();
+                rule.dayOfWeek = [0, new schedule.Range(0, 7)];
+                rule.hour = 17;
+                rule.minute = 0;
+                schedule.scheduleJob(rule, async function () {
+                  log.info('NS-Pharm START inside this.timerStart');
+                  await this.onStartUploadFolder(i, 2);
+                });
+              }
+              // this.onStartUploadFolder(i, 2);
               break;
             }
           }
         }
         
-      }, 3000);  //폴더선택
+    }, 1000);  //폴더선택
 
 
     /*----------------------------------------------------
@@ -575,11 +521,8 @@ export class HomePageComponent implements OnInit, OnDestroy {
            LISTENER : SELECTFOLDER의 리스너
     ----------------------------------------------------------------*/
     this.electronService.ipcRenderer.on('SELECTFOLDER', (event: Electron.IpcMessageEvent, response: any) => {
-      //log.info('받음,home-page, SELECTFOLDER', response, this.uploading);
-      //log.info('받음,home-page, SELECTFOLDER = ',response.directory);
-
       this.electronService.ipcRenderer.removeListener('SELECTFOLDER', (event: Electron.IpcMessageEvent, response: any)=>{
-        //log.info('SELECTFOLDER, 콜백한번만 호출되게...');
+
       });
 
       if (response.directory != null) {
@@ -593,7 +536,20 @@ export class HomePageComponent implements OnInit, OnDestroy {
         if (this.uploading === false) {
           //log.info('home-page, SELECTFOLDER ?? folderIndex = ', response.folderIndex)
           this.storageService.set('login',false); 
-          this.onStartUploadFolder(response.folderIndex, 3);  //3초후에 업로드
+          if(this.member.program!='ns_pharm'){
+            this.onStartUploadFolder(response.folderIndex, 3);  //3초후에 업로드
+          }else{
+            log.info('NS-Pharm inside this.timerStart');
+            var rule = new schedule.RecurrenceRule();
+            rule.dayOfWeek = [0, new schedule.Range(0, 7)];
+            rule.hour = 17;
+            rule.minute = 0;
+            schedule.scheduleJob(rule, async function () {
+              log.info('NS-Pharm START inside this.timerStart');
+              await this.onStartUploadFolder(0, 2);
+            });
+          }
+          // this.onStartUploadFolder(response.folderIndex, 3);  //3초후에 업로드
         }
       }
       this.ReadFolderInfo();
