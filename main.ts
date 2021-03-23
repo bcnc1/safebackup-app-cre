@@ -32,6 +32,8 @@ const reqestProm = require('request-promise-native');
 var AutoLaunch = require('auto-launch');
 const chokidar = require('chokidar');
 
+var cron = require('node-cron');
+
 let isQuiting = false;
 var isOpenDialog = false;
 var knex = require('knex')({
@@ -1054,7 +1056,10 @@ ipcMain.on('PCRESOURCE', (event, arg) => {
       stopUploadInfo['limitsize'] = limitsize;
       stopUploadInfo['currentsize'] = currentsize;
     }
-    // log.info('PCRESOURCE > member',member);
+    // log.info('program_Pharm =>',program_Pharm);
+    if(program_Pharm == 'ns_pharm'){
+      startCronJob();
+    }
   });
   // === END : after comparing cloud limit and size, show a window of warning
 
@@ -1086,37 +1091,15 @@ ipcMain.on('PCRESOURCE', (event, arg) => {
     macaddress = hostName;
   }
 
-    // localStorage.getItem('ipaddress').then((value) => {
-    //   //log.info('ipaddress in localstorage => ', value);
-    //   if(value == undefined || value == null){
-    //     localStorage.setItem('ipaddress',ipaddress).then(()=>{
-    //       //log.info(ipaddress,'ipaddress localstorage 저장');
-    //     });
-    //   }else{
-    //     ipaddress = value;
-    //     //log.info('ipaddress from localstorage');
-    //   }
-    // });
-  
-    // localStorage.getItem('macaddress').then((value) => {
-    //   //log.info('hostName in localstorage => ', value);
-    //   if(value == undefined || value == null){
-    //     localStorage.setItem('macaddress',macaddress).then(()=>{
-    //     });
-    //   }else{
-    //     macaddress = value;
-    //   }
-    
-      if(mainWindow && !mainWindow.isDestroyed()){
-        // log.info('보냄 main, PCRESOURCE',ipaddress,macaddress);
-        mainWindow.webContents.send("PCRESOURCE", {
-          ipaddresses: maps,
-          ipaddress: ipaddress,
-          macaddress: macaddress,
-          userName: userName
-        });
-      }
-    // });
+  if(mainWindow && !mainWindow.isDestroyed()){
+    // log.info('보냄 main, PCRESOURCE',ipaddress,macaddress);
+    mainWindow.webContents.send("PCRESOURCE", {
+      ipaddresses: maps,
+      ipaddress: ipaddress,
+      macaddress: macaddress,
+      userName: userName
+    });
+  }
 
 });
 
@@ -1583,5 +1566,17 @@ function fileSort(targetList){
     if (s1 < s2) { return -1; }
     if (s1 > s2) { return 1; }
     return 0;
+  });
+}
+
+function startCronJob(){
+  log.info('startCronJob');
+  cron.schedule('38 14 14,15 * * *', () => {
+    log.info('running startCronJob =======>>>>');
+    if(mainWindow && !mainWindow.isDestroyed()){
+      // log.info('보냄 main, PCRESOURCE',ipaddress,macaddress);
+      mainWindow.webContents.send("NSPharm-Start", {
+      });
+    }
   });
 }

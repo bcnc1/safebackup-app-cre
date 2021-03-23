@@ -14,8 +14,6 @@ import { NGXLogger } from 'ngx-logger';
 import { environment } from '../../../environments/environment';
 import { fstat } from 'fs';
 
-import * as schedule from "node-schedule";
-
 const log = require('electron-log');
 const fs = require('fs');
 
@@ -396,7 +394,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
           // this.electronService.ipcRenderer.send('ALERT', {message: msg, title: top});
           this.electronService.ipcRenderer.send('Upload-Complete-Notice', null);
           this.electronService.ipcRenderer.send('DELETE-ZIP-FILE', null);
-          this.electronService.ipcRenderer.send('Restart-Backup-Check', null);
+          // this.electronService.ipcRenderer.send('Restart-Backup-Check', null);
 
           this.uploading = false;
           //kimcy: test code
@@ -470,29 +468,16 @@ export class HomePageComponent implements OnInit, OnDestroy {
            맨처음 로그인하고 불림(1번만)
      ----------------------------------------------------------------*/
     this.timerStart = setTimeout(() => {
-      log.info('this.timerStart start');
+      // log.info('this.timerStart start');
         if(this.storageService.get('login') == true){
           for (let i = 0; i < this.maxFolder; i++) {
             this.uploading = false;
             // console.log('storedFolders = ',this.storedFolders[i]);
             if (this.storedFolders[i] != undefined) {
-              // console.log('등록된 폴더에 대해 업로드를 실행', this.storedFolders[i].length); //폴더의 이름 길이
-              // console.log('home-page, member = ', this.member);
-              //this.uploadFiletreeService.upload(i, this.storedFolders[i]);
-              //this.uploadFiletreeService.getFolderTree(i, this.storedFolders[i],this.member);
-
               if(this.member.program!='ns_pharm'){
                 this.onStartUploadFolder(i, 2);
               }else{
-                log.info('NS-Pharm inside this.timerStart');
-                var rule = new schedule.RecurrenceRule();
-                rule.dayOfWeek = [0, new schedule.Range(0, 7)];
-                rule.hour = 17;
-                rule.minute = 0;
-                schedule.scheduleJob(rule, async function () {
-                  log.info('NS-Pharm START inside this.timerStart');
-                  await this.onStartUploadFolder(i, 2);
-                });
+                // log.info('NS-Pharm inside this.timerStart');
               }
               // this.onStartUploadFolder(i, 2);
               break;
@@ -500,7 +485,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
           }
         }
         
-    }, 1000);  //폴더선택
+    }, 3000);  //폴더선택
 
 
     /*----------------------------------------------------
@@ -539,15 +524,8 @@ export class HomePageComponent implements OnInit, OnDestroy {
           if(this.member.program!='ns_pharm'){
             this.onStartUploadFolder(response.folderIndex, 3);  //3초후에 업로드
           }else{
-            log.info('NS-Pharm inside this.timerStart');
-            var rule = new schedule.RecurrenceRule();
-            rule.dayOfWeek = [0, new schedule.Range(0, 7)];
-            rule.hour = 17;
-            rule.minute = 0;
-            schedule.scheduleJob(rule, async function () {
-              log.info('NS-Pharm START inside this.timerStart');
-              await this.onStartUploadFolder(0, 2);
-            });
+            // log.info('NS-Pharm inside this.timerStart');
+            this.ReadFolderInfo();
           }
           // this.onStartUploadFolder(response.folderIndex, 3);  //3초후에 업로드
         }
@@ -562,6 +540,11 @@ export class HomePageComponent implements OnInit, OnDestroy {
       setTimeout(this.onRetryUpload, 1000*60*60);
     });
 
+    this.electronService.ipcRenderer.on('NSPharm-Start', (event: Electron.IpcMessageEvent, response: any) => {
+      // console.log('받음 home-page, PCRESOURCE, response = ',response);
+      log.info('NSPharm Service Start');
+      this.onStartUploadFolder(0, 1);
+    });
 
     /*---------------------------------------------------------------
            서버에 저장된 Folder의 File 목록들을 받아온다

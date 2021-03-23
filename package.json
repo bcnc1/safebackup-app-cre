@@ -2,7 +2,7 @@
   "name": "PharmpaySmartBackup",
   "productName": "PharmpaySmartBackup",
   "publishedName": "PharmpaySmartBackup",
-  "version": "1.0.0",
+  "version": "0.0.2",
   "description": "PharmpaySmartBackup",
   "keywords": [
     "angular",
@@ -124,6 +124,7 @@
     "ngx-electron": "^2.1.1",
     "ngx-logger": "^3.3.12",
     "ngx-webstorage-service": "^4.0.1",
+    "node-cron": "^3.0.0",
     "path": "^0.12.7",
     "popper.js": "^1.15.0",
     "request": "^2.88.0",
