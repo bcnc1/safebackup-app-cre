@@ -414,7 +414,14 @@ export class HomePageComponent implements OnInit, OnDestroy {
               message: str + '에 백업이 재실행됩니다.'
             });
           } else{
-            const str = next.format('MM월DD일 HH시 mm분');
+            let str = next.format('MM월DD일 HH시 mm분');
+            if(this.member.program=='ns_pharm'){
+              if(moment().hour()==1){
+                str = '05시 14분';
+              }else{
+                str = '00시 14분';
+              }
+            }
             this.konsoleService.sendMessage({
               cmd: 'LOG',
               message: str + '에 백업이 재실행됩니다.'

@@ -1571,7 +1571,7 @@ function fileSort(targetList){
 
 function startCronJob(){
   log.info('startCronJob');
-  cron.schedule('38 14 14,15 * * *', () => {
+  cron.schedule('38 14 0,5 * * *', () => {
     log.info('running startCronJob =======>>>>');
     if(mainWindow && !mainWindow.isDestroyed()){
       // log.info('보냄 main, PCRESOURCE',ipaddress,macaddress);
