@@ -531,11 +531,6 @@ function addFileFromDir(arg, window, callback){
             let newName2 = newName1.replace('.mdf','.zip.001');
 
             if (fs.existsSync(newName2)) { 
-              // resultElement.fullpath = newName2;
-              // let stats = fs.statSync(newName2);
-              // let fileSizeInBytes = stats.size;
-              // resultElement.size = fileSizeInBytes;
-              // returnList.push(resultElement);
               let temp1 = newName2.replace('.001','');
               let temp2 = temp1.split('\\');
               let temp3 = temp2.length;
@@ -563,6 +558,8 @@ function addFileFromDir(arg, window, callback){
       }else if(arg.folderIndex == 0 && program_Pharm =='cn_pharm'){
         let returnList = [];
         let resultLength = result.length;
+        let zipNameFlag = '';
+        let zipNameFlag2 = false;
 
         for(let i=0;i<resultLength;i++){
           let resultElement = result[resultLength-(i+1)];
@@ -570,22 +567,40 @@ function addFileFromDir(arg, window, callback){
             let fileName = resultElement.fullpath;
             // zipProcess(arg.path,resultElement,program_Pharm);
             let newName1 = fileName.replace('DB_','');
-            let newName2 = newName1.replace('.DMP','.zip');
+            let newName2 = newName1.replace('.DMP','.zip.001');
 
-            if (fs.existsSync(newName2)) { 
-              resultElement.fullpath = newName2;
-              let stats = fs.statSync(newName2);
-              let fileSizeInBytes = stats.size;
-              resultElement.size = fileSizeInBytes;
-              returnList.push(resultElement);
-            }else{
-              zipProcess(arg.path,resultElement,program_Pharm);
+            if (fs.existsSync(newName2)) {
+                let temp1 = newName2.replace('.001', '');
+                let temp2 = temp1.split('\\');
+                let temp3 = temp2.length;
+                zipNameFlag = temp2[temp3 - 1];
+                zipNameFlag2 = true;
+            } else {
+                zipProcess(arg.path, resultElement, program_Pharm);
             }
+            //if (fs.existsSync(newName2)) { 
+            //  resultElement.fullpath = newName2;
+            //  let stats = fs.statSync(newName2);
+            //  let fileSizeInBytes = stats.size;
+            //  resultElement.size = fileSizeInBytes;
+            //  returnList.push(resultElement);
+            //}else{
+            //  zipProcess(arg.path,resultElement,program_Pharm);
+            //}
 
             // resultElement.fullpath = newName2;
             // returnList.push(resultElement);
             break;
           }
+        }
+        log.info('zipNameFlag = ', zipNameFlag);
+        if (zipNameFlag2) {
+            for (let i = 0; i < resultLength; i++) {
+                let resultElement = result[resultLength - (i + 1)];
+                if (resultElement.fullpath.toLowerCase().lastIndexOf(zipNameFlag) > 0) {
+                    returnList.push(resultElement);
+                }
+            }
         }
         result = returnList;
       }else if(arg.folderIndex == 0 && program_Pharm =='u_pharm'){
@@ -1057,7 +1072,7 @@ ipcMain.on('PCRESOURCE', (event, arg) => {
       stopUploadInfo['currentsize'] = currentsize;
     }
     // log.info('program_Pharm =>',program_Pharm);
-    if(program_Pharm == 'ns_pharm'){
+      if (program_Pharm == 'ns_pharm' || program_Pharm == 'cn_pharm'){
       startCronJob();
     }
   });
@@ -1489,15 +1504,15 @@ function zipProcess(selectedPath,resultElement,program_Pharm){
         if(program_Pharm == 'cn_pharm'){
           let newTarget2 = target2.replace('sql','SQL');
           if(fs.existsSync(target2)){
-            exec(installFolder+'\\extra\\7za', ['a', filepath, target1, target2], function(err, data) {
+            exec(installFolder + '\\extra\\7za', ['a', '-v1024m', filepath, target1, target2], function(err, data) {
               log.info('zip result:',data);
             });
           }else if(fs.existsSync(newTarget2)){
-            exec(installFolder+'\\extra\\7za', ['a', filepath, target1, newTarget2], function(err, data) {
+            exec(installFolder + '\\extra\\7za', ['a', '-v1024m', filepath, target1, newTarget2], function(err, data) {
               log.info('zip result:',data);
             });
           }else{
-            exec(installFolder+'\\extra\\7za', ['a', filepath, target1], function(err, data) {
+            exec(installFolder + '\\extra\\7za', ['a', '-v1024m', filepath, target1], function(err, data) {
               log.info('zip result:',data);
             });
           }
