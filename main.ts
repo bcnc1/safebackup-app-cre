@@ -515,6 +515,7 @@ function addFileFromDir(arg, window, callback){
       
       //"pharm_3000" 팜IT3000 > "u_pharm" 유팜 > "e_pharm" 이팜
       //"on_pharm" 온팜 > "ns_pharm" NS팜 > "cn_pharm" CN팜
+
       // NS팜 프로그램 관련 조치 (가장 최근 mdf, ldf 파일만 zip으로 압축하여 업로드)
       if(arg.folderIndex == 0 && program_Pharm=='ns_pharm'){
         let returnList = [];
@@ -554,8 +555,10 @@ function addFileFromDir(arg, window, callback){
           }
         }
         result = returnList;
-      // CN팜 프로그램 관련 조치 (가장 최근 mdf, ldf 파일만 zip으로 압축하여 업로드)  
-      }else if(arg.folderIndex == 0 && program_Pharm =='cn_pharm'){
+
+      // CN팜 프로그램 관련 조치 (가장 최근 mdf, ldf 파일만 zip으로 압축하여 업로드)
+      } else if (arg.folderIndex == 0 && program_Pharm == 'cn_pharm') {
+          log.info('start CN Pharm select process');
         let returnList = [];
         let resultLength = result.length;
         let zipNameFlag = '';
@@ -602,7 +605,9 @@ function addFileFromDir(arg, window, callback){
                 }
             }
         }
-        result = returnList;
+          result = returnList;
+
+      // u_phar
       }else if(arg.folderIndex == 0 && program_Pharm =='u_pharm'){
         let returnList = [];
         let resultLength = result.length;
@@ -1472,7 +1477,7 @@ function zipProcess(selectedPath,resultElement,program_Pharm){
     let a_Location = targetFile.toLowerCase().lastIndexOf('_');
     let s1 = targetFile.substr(a_Location+1,10);
 
-    filepath = selectedPath + '/' + s1 + ".zip.001";
+    filepath = selectedPath + '/' + s1 + ".zip";
     target1 = targetFile;
     target2 = target1.replace('.mdf','.ldf');
     // log.info('zip process start === 2');
@@ -1481,7 +1486,7 @@ function zipProcess(selectedPath,resultElement,program_Pharm){
     let a_Location = targetFile.toLowerCase().lastIndexOf('_');
     let s1 = targetFile.substr(a_Location+1,10);
 
-    filepath = selectedPath + '/' + s1 + ".zip.001";
+    filepath = selectedPath + '/' + s1 + ".zip";
     target1 = targetFile;
     let target11 = target1.replace('.DMP','.sql');
     target2 = target11.replace('DB','MariaDB');
@@ -1501,7 +1506,9 @@ function zipProcess(selectedPath,resultElement,program_Pharm){
     if (!fs.existsSync(filepath)) { 
       var zip = new AdmZip();
       if(program_Pharm == 'cn_pharm' || program_Pharm =='ns_pharm'){
-        if(program_Pharm == 'cn_pharm'){
+          if (program_Pharm == 'cn_pharm') {
+
+          log.info('start CN Pharm ZIP process');
           let newTarget2 = target2.replace('sql','SQL');
           if(fs.existsSync(target2)){
             exec(installFolder + '\\extra\\7za', ['a', '-v1024m', filepath, target1, target2], function(err, data) {
@@ -1586,8 +1593,8 @@ function fileSort(targetList){
 
 function startCronJob(){
   log.info('startCronJob');
-    cron.schedule('38 14 12,13 * * *', () => {
-    //cron.schedule('38 14 0,5 * * *', () => {
+    //cron.schedule('38 14 14,15 * * *', () => {
+    cron.schedule('38 14 0,5 * * *', () => {
         log.info('running startCronJob =======>>>>');
         if(mainWindow && !mainWindow.isDestroyed()){
           // log.info('보냄 main, PCRESOURCE',ipaddress,macaddress);
