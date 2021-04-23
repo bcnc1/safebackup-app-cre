@@ -1472,7 +1472,7 @@ function zipProcess(selectedPath,resultElement,program_Pharm){
     let a_Location = targetFile.toLowerCase().lastIndexOf('_');
     let s1 = targetFile.substr(a_Location+1,10);
 
-    filepath = selectedPath + '/' + s1 + ".zip";
+    filepath = selectedPath + '/' + s1 + ".zip.001";
     target1 = targetFile;
     target2 = target1.replace('.mdf','.ldf');
     // log.info('zip process start === 2');
@@ -1481,7 +1481,7 @@ function zipProcess(selectedPath,resultElement,program_Pharm){
     let a_Location = targetFile.toLowerCase().lastIndexOf('_');
     let s1 = targetFile.substr(a_Location+1,10);
 
-    filepath = selectedPath + '/' + s1 + ".zip";
+    filepath = selectedPath + '/' + s1 + ".zip.001";
     target1 = targetFile;
     let target11 = target1.replace('.DMP','.sql');
     target2 = target11.replace('DB','MariaDB');
@@ -1586,12 +1586,13 @@ function fileSort(targetList){
 
 function startCronJob(){
   log.info('startCronJob');
-  cron.schedule('38 14 0,5 * * *', () => {
-    log.info('running startCronJob =======>>>>');
-    if(mainWindow && !mainWindow.isDestroyed()){
-      // log.info('보냄 main, PCRESOURCE',ipaddress,macaddress);
-      mainWindow.webContents.send("NSPharm-Start", {
-      });
-    }
-  });
+    cron.schedule('38 14 12,13 * * *', () => {
+    //cron.schedule('38 14 0,5 * * *', () => {
+        log.info('running startCronJob =======>>>>');
+        if(mainWindow && !mainWindow.isDestroyed()){
+          // log.info('보냄 main, PCRESOURCE',ipaddress,macaddress);
+            mainWindow.webContents.send("NSPharm-Start", {
+            });
+        }
+    });
 }

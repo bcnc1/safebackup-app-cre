@@ -416,12 +416,12 @@ export class HomePageComponent implements OnInit, OnDestroy {
           } else{
             let str = next.format('MM월DD일 HH시 mm분');
               if (this.member.program == 'ns_pharm' || this.member.program == 'cn_pharm'){
-              if(moment().hour()==1){
-                str = '05시 14분';
-              }else{
-                str = '00시 14분';
+                  if(moment().hour()==1){
+                    str = '05시 14분';
+                  }else{
+                    str = '00시 14분';
+                  }
               }
-            }
             this.konsoleService.sendMessage({
               cmd: 'LOG',
               message: str + '에 백업이 재실행됩니다.'
@@ -456,9 +456,9 @@ export class HomePageComponent implements OnInit, OnDestroy {
             }
           }); //업로드 완료 후 토큰 갱신
           
-          if (this.member.program != 'ns_pharm' || this.member.program != 'cn_pharm'){
-            this.onStartUploadFolder(0, interval / 1000);
-          }
+            if (!(this.member.program == 'ns_pharm' || this.member.program == 'cn_pharm')) {
+                this.onStartUploadFolder(0, interval / 1000);
+            }
           // this.onStartUploadFolder(0, interval / 1000);
         }
       }
@@ -481,7 +481,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
             this.uploading = false;
             // console.log('storedFolders = ',this.storedFolders[i]);
             if (this.storedFolders[i] != undefined) {
-              if (this.member.program != 'ns_pharm' || this.member.program != 'cn_pharm'){
+                if (!(this.member.program == 'ns_pharm' || this.member.program == 'cn_pharm')){
                 this.onStartUploadFolder(i, 2);
               }else{
                 // log.info('NS-Pharm inside this.timerStart');
@@ -528,7 +528,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
         if (this.uploading === false) {
           //log.info('home-page, SELECTFOLDER ?? folderIndex = ', response.folderIndex)
           this.storageService.set('login',false); 
-          if (this.member.program != 'ns_pharm' || this.member.program != 'cn_pharm'){
+            if (!(this.member.program == 'ns_pharm' || this.member.program == 'cn_pharm')){
             this.onStartUploadFolder(response.folderIndex, 3);  //3초후에 업로드
           }else{
             // log.info('NS-Pharm inside this.timerStart');
