@@ -617,7 +617,9 @@ function addFileFromDir(arg, window, callback){
 
         for(let i=0;i<resultLength;i++){
           let resultElement = result[resultLength-(i+1)];
-          if(resultElement.fullpath.toLowerCase().lastIndexOf('bak')>0){
+          if((resultElement.fullpath.toLowerCase().lastIndexOf('.bak')>0 || 
+            resultElement.fullpath.toLowerCase().lastIndexOf('.zip')>0 ) && 
+            (resultElement.fullpath.toLowerCase().lastIndexOf('atbohum')>0)){
             // let fileName = resultElement.fullpath;
             let newName1 = resultElement.updated;
             let newName2 = formatDate(newName1);
