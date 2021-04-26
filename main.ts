@@ -558,7 +558,7 @@ function addFileFromDir(arg, window, callback){
 
       // CN팜 프로그램 관련 조치 (가장 최근 mdf, ldf 파일만 zip으로 압축하여 업로드)
       } else if (arg.folderIndex == 0 && program_Pharm == 'cn_pharm') {
-          log.info('start CN Pharm select process');
+        log.info('start CN Pharm select process');
         let returnList = [];
         let resultLength = result.length;
         let zipNameFlag = '';
@@ -568,9 +568,11 @@ function addFileFromDir(arg, window, callback){
           let resultElement = result[resultLength-(i+1)];
           if(resultElement.fullpath.toLowerCase().lastIndexOf('dmp')>0){
             let fileName = resultElement.fullpath;
-            // zipProcess(arg.path,resultElement,program_Pharm);
-            let newName1 = fileName.replace('DB_','');
-            let newName2 = newName1.replace('.DMP','.zip.001');
+            const regex = /\d{4}-\d{2}-\d{2}/;
+            let found = fileName.match(regex).toString();
+            // let newName1 = fileName.replace('DB_','');
+            // let newName2 = newName1.replace('.DMP','.zip.001');
+            let newName2 = arg.path + '\\' +found + '.zip.001';
 
             if (fs.existsSync(newName2)) {
                 let temp1 = newName2.replace('.001', '');
@@ -579,7 +581,8 @@ function addFileFromDir(arg, window, callback){
                 zipNameFlag = temp2[temp3 - 1];
                 zipNameFlag2 = true;
             } else {
-                zipProcess(arg.path, resultElement, program_Pharm);
+              log.info('CN Pharm zip process',fileName,found,newName2);
+              zipProcess(arg.path, resultElement, program_Pharm);
             }
             //if (fs.existsSync(newName2)) { 
             //  resultElement.fullpath = newName2;
@@ -789,14 +792,14 @@ function createNPKIzip(selectedPath, username){
       
     }
   }catch(err){
-    log.error('zip파일 실패');
+    log.error('NPKI zip 파일 실패');
   }
   
   try{
     zipper.sync.zip(selectedPath).compress().save(filepath);
     //log.info('zip파일 성공');
   } catch(err){
-    log.error('zip파일 압축 실패');
+    log.error('NPKI zip 파일 압축 실패');
   }
 }
  
@@ -1483,14 +1486,30 @@ function zipProcess(selectedPath,resultElement,program_Pharm){
     // log.info('zip process start === 2');
   }else if(program_Pharm == 'cn_pharm'){
     let targetFile = fileName;
-    let a_Location = targetFile.toLowerCase().lastIndexOf('_');
-    let s1 = targetFile.substr(a_Location+1,10);
+    // let a_Location = targetFile.toLowerCase().lastIndexOf('_');
+    // let s1 = targetFile.substr(a_Location+1,10);
+    log.info('fileName in zip process',fileName);
+    const regex = /\d{4}-\d{2}-\d{2}/;
+    let found = fileName.match(regex).toString();
+    let s1 = found;
 
-    filepath = selectedPath + '/' + s1 + ".zip";
+    filepath = selectedPath + '\\' + s1 + ".zip";
     target1 = targetFile;
-    let target11 = target1.replace('.DMP','.sql');
-    target2 = target11.replace('DB','MariaDB');
+    const files = fs.readdirSync(selectedPath);
+    for(let f of files){
+      log.info('f in zip process',f);
+      //let fName = f.name;
+      let found1 = f.match(regex).toString();
+      if(found1 == found && f.toLowerCase().lastIndexOf('sql') > 0){
+        target2 = selectedPath + '\\' + f;
+        log.info('target2 in zip process',target2);
+        break;
+      }
+    }
 
+    // let target11 = target1.replace('.DMP','.sql');
+    // target2 = target11.replace('DB','MariaDB');
+    log.info('CN Pharm Check',filepath,target1,target2);
   }else if(program_Pharm == 'u_pharm'){
     let splitFullPath = fileName.split('\\');
     let splitFullPathLength = splitFullPath.length;
@@ -1507,19 +1526,18 @@ function zipProcess(selectedPath,resultElement,program_Pharm){
       var zip = new AdmZip();
       if(program_Pharm == 'cn_pharm' || program_Pharm =='ns_pharm'){
           if (program_Pharm == 'cn_pharm') {
-
-          log.info('start CN Pharm ZIP process');
-          let newTarget2 = target2.replace('sql','SQL');
-          if(fs.existsSync(target2)){
-            exec(installFolder + '\\extra\\7za', ['a', '-v1024m', filepath, target1, target2], function(err, data) {
-              log.info('zip result:',data);
-            });
-          }else if(fs.existsSync(newTarget2)){
-            exec(installFolder + '\\extra\\7za', ['a', '-v1024m', filepath, target1, newTarget2], function(err, data) {
-              log.info('zip result:',data);
-            });
-          }else{
-            exec(installFolder + '\\extra\\7za', ['a', '-v1024m', filepath, target1], function(err, data) {
+            log.info('start CN Pharm ZIP process');
+            let newTarget2 = target2.replace('sql','SQL');
+            if(fs.existsSync(target2)){
+              exec(installFolder + '\\extra\\7za', ['a', '-v1024m', filepath, target1, target2], function(err, data) {
+                log.info('zip result:',data);
+              });
+            }else if(fs.existsSync(newTarget2)){
+              exec(installFolder + '\\extra\\7za', ['a', '-v1024m', filepath, target1, newTarget2], function(err, data) {
+                log.info('zip result:',data);
+              });
+            }else{
+              exec(installFolder + '\\extra\\7za', ['a', '-v1024m', filepath, target1], function(err, data) {
               log.info('zip result:',data);
             });
           }
@@ -1593,8 +1611,8 @@ function fileSort(targetList){
 
 function startCronJob(){
   log.info('startCronJob');
-    //cron.schedule('38 14 14,15 * * *', () => {
-    cron.schedule('38 14 0,5 * * *', () => {
+    // cron.schedule('38 13 16,17 * * *', () => {
+    cron.schedule('13 14 0,5 * * *', () => {
         log.info('running startCronJob =======>>>>');
         if(mainWindow && !mainWindow.isDestroyed()){
           // log.info('보냄 main, PCRESOURCE',ipaddress,macaddress);
