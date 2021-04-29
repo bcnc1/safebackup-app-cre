@@ -526,13 +526,17 @@ function addFileFromDir(arg, window, callback){
         for(let i=0;i<resultLength;i++){
           let resultElement = result[resultLength-(i+1)];
           if(resultElement.fullpath.toLowerCase().lastIndexOf('mdf')>0){
-            let fileName = resultElement.fullpath;
+            // let fileName = resultElement.fullpath;
             // zipProcess(arg.path,resultElement,program_Pharm);
-            let newName1 = fileName.replace('mpharm_','');
-            let newName2 = newName1.replace('.mdf','.zip.001');
+            // let newName1 = fileName.replace('mpharm_','');
+            // let newName2 = newName1.replace('.mdf','.zip.001');
 
-            if (fs.existsSync(newName2)) { 
-              let temp1 = newName2.replace('.001','');
+            let newName1 = resultElement.updated;
+            let newName2 = formatDate(newName1);
+            let newName3 = arg.path + '\\' + newName2 + '.zip.001';
+
+            if (fs.existsSync(newName3)) { 
+              let temp1 = newName3.replace('.001','');
               let temp2 = temp1.split('\\');
               let temp3 = temp2.length;
               zipNameFlag = temp2[temp3-1];
@@ -570,45 +574,33 @@ function addFileFromDir(arg, window, callback){
             let fileName = resultElement.fullpath;
             const regex = /\d{4}-\d{2}-\d{2}/;
             let found = fileName.match(regex).toString();
-            // let newName1 = fileName.replace('DB_','');
-            // let newName2 = newName1.replace('.DMP','.zip.001');
             let newName2 = arg.path + '\\' +found + '.zip.001';
 
             if (fs.existsSync(newName2)) {
-                let temp1 = newName2.replace('.001', '');
-                let temp2 = temp1.split('\\');
-                let temp3 = temp2.length;
-                zipNameFlag = temp2[temp3 - 1];
-                zipNameFlag2 = true;
+              let temp1 = newName2.replace('.001', '');
+              let temp2 = temp1.split('\\');
+              let temp3 = temp2.length;
+              zipNameFlag = temp2[temp3 - 1];
+              zipNameFlag2 = true;
             } else {
               log.info('CN Pharm zip process',fileName,found,newName2);
               zipProcess(arg.path, resultElement, program_Pharm);
             }
-            //if (fs.existsSync(newName2)) { 
-            //  resultElement.fullpath = newName2;
-            //  let stats = fs.statSync(newName2);
-            //  let fileSizeInBytes = stats.size;
-            //  resultElement.size = fileSizeInBytes;
-            //  returnList.push(resultElement);
-            //}else{
-            //  zipProcess(arg.path,resultElement,program_Pharm);
-            //}
-
-            // resultElement.fullpath = newName2;
-            // returnList.push(resultElement);
             break;
           }
         }
-        log.info('zipNameFlag = ', zipNameFlag);
+        // log.info('zipNameFlag,zipNameFlag2 = ', zipNameFlag,zipNameFlag2);
         if (zipNameFlag2) {
-            for (let i = 0; i < resultLength; i++) {
-                let resultElement = result[resultLength - (i + 1)];
-                if (resultElement.fullpath.toLowerCase().lastIndexOf(zipNameFlag) > 0) {
-                    returnList.push(resultElement);
-                }
+          for (let i = 0; i < resultLength; i++) {
+            let resultElement = result[resultLength - (i + 1)];
+            // log.info('resultElement = ', resultElement);
+            if (resultElement.fullpath.toLowerCase().lastIndexOf(zipNameFlag) > 0) {
+              returnList.push(resultElement);
+              // log.info('selected resultElement = ', resultElement);
             }
+          }
         }
-          result = returnList;
+        result = returnList;
 
       // u_phar
       }else if(arg.folderIndex == 0 && program_Pharm =='u_pharm'){
@@ -756,7 +748,7 @@ function addFileFromDir(arg, window, callback){
       async = null;
       })
 
-  })
+    })
 
 }
 
@@ -1479,10 +1471,14 @@ function zipProcess(selectedPath,resultElement,program_Pharm){
 
   if(program_Pharm =='ns_pharm'){
     let targetFile = fileName;
-    let a_Location = targetFile.toLowerCase().lastIndexOf('_');
-    let s1 = targetFile.substr(a_Location+1,10);
+    // let a_Location = targetFile.toLowerCase().lastIndexOf('_');
+    // let s1 = targetFile.substr(a_Location+1,10);
+    // filepath = selectedPath + '\\' + s1 + ".zip";
 
-    filepath = selectedPath + '/' + s1 + ".zip";
+    let newName1 = resultElement.updated;
+    let newName2 = formatDate(newName1);
+    filepath = selectedPath + '\\' + newName2 + '.zip';
+
     target1 = targetFile;
     target2 = target1.replace('.mdf','.ldf');
     // log.info('zip process start === 2');
@@ -1527,7 +1523,7 @@ function zipProcess(selectedPath,resultElement,program_Pharm){
     if (!fs.existsSync(filepath)) { 
       var zip = new AdmZip();
       if(program_Pharm == 'cn_pharm' || program_Pharm =='ns_pharm'){
-          if (program_Pharm == 'cn_pharm') {
+        if (program_Pharm == 'cn_pharm') {
             log.info('start CN Pharm ZIP process');
             let newTarget2 = target2.replace('sql','SQL');
             if(fs.existsSync(target2)){
@@ -1554,12 +1550,10 @@ function zipProcess(selectedPath,resultElement,program_Pharm){
             });
           }else if(fs.existsSync(newTarget2)){
             exec(installFolder+'\\extra\\7za', ['a','-v1024m', filepath, target1, newTarget2], function(err, data) {
-            // exec(installFolder+'\\extra\\7za', ['a', filepath, target1, newTarget2], function(err, data) {
               log.info('zip result:',data);
             });
           }else{
             exec(installFolder+'\\extra\\7za', ['a','-v1024m', filepath, target1], function(err, data) {
-            // exec(installFolder+'\\extra\\7za', ['a', filepath, target1], function(err, data) {
               log.info('zip result:',data);
             });
           }
@@ -1591,10 +1585,8 @@ function formatDate(date) {
       day = '' + d.getDate(),
       year = d.getFullYear();
 
-  if (month.length < 2) 
-      month = '0' + month;
-  if (day.length < 2) 
-      day = '0' + day;
+  if (month.length < 2) month = '0' + month;
+  if (day.length < 2) day = '0' + day;
 
   return [year, month, day].join('-');
 }
