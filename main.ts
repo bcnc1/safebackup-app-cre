@@ -508,11 +508,14 @@ function addFileFromDir(arg, window, callback){
     })
     .on('ready', function() 
     { 
-      log.info('Initial scan complete. Ready for changes.');
-      fileSort(result);
+        log.info('Initial scan complete. Ready for changes.');
+        fileSort(result);
       // log.info('result BEFORE ? = ', result);
       //log.info('tableName = ', tableName);
-      
+        if (arg.folderIndex == 0) {
+            backupFolder_creSoty = arg.path;
+        }
+        
       //"pharm_3000" 팜IT3000 > "u_pharm" 유팜 > "e_pharm" 이팜
       //"on_pharm" 온팜 > "ns_pharm" NS팜 > "cn_pharm" CN팜
 
@@ -1152,45 +1155,55 @@ ipcMain.on('SELECTFOLDER', (event, arg) => {
 
 ipcMain.on('DELETE-ZIP-FILE', (event, arg) => {
 
-  log.info('Delete Zip files in backup folder');
-  if(backupFolder_creSoty == ''){
-    log.error('Not a pharm program to delete files');
-  }else{
+    log.info('Delete Zip files in backup folder');
+    if (program_Pharm == 'pharm_3000' || program_Pharm == 'e_pharm' || program_Pharm == 'on_pharm'){
+        log.error('Not a pharm program to delete files');
+    }else{
 
-    let targetList1 = [];
-    try{
-      var files = fs.readdirSync(backupFolder_creSoty);
-      for(var i in files) {
-        if(files[i].toLowerCase().lastIndexOf('.zip') > 0){
-          targetList1.push(files[i]);
-        }
-      }
+        let targetList1 = [];
+        try{
+            var files = fs.readdirSync(backupFolder_creSoty);
+            for(var i in files) {
+                if(files[i].toLowerCase().lastIndexOf('.zip') > 0){
+                    targetList1.push(files[i]);
+                }
+            }
       
-      targetList1.sort(function(a, b) {
-        let s11 = fs.statSync(backupFolder_creSoty +'/'+a);
-        let s12 = fs.statSync(backupFolder_creSoty +'/'+b);
-        let s1 = s11.ctime;
-        let s2 = s12.ctime;
-        if (s1 < s2) { return 1; }
-        if (s1 > s2) { return -1; }
-        return 0;
-      });
+            targetList1.sort(function(a, b) {
+            let s11 = fs.statSync(backupFolder_creSoty +'/'+a);
+            let s12 = fs.statSync(backupFolder_creSoty +'/'+b);
+            let s1 = s11.ctime;
+            let s2 = s12.ctime;
+            if (s1 < s2) { return 1; }
+            if (s1 > s2) { return -1; }
+            return 0;
+            });
 
-      if(targetList1.length <= 3){
-        log.error('None to delete');
-      }else{
-        // log.info('targetList1',targetList1);
-        for(var j=3;j<targetList1.length;j++){
-          // log.info('targetList1[i]',targetList1[j]);
-          fs.unlinkSync(backupFolder_creSoty +'/'+targetList1[j]);
+            if (targetList1.length <= 3 && program_Pharm == 'u_pharm'){
+                log.error('None to delete');
+            }else{
+            // log.info('targetList1',targetList1);
+                if (program_Pharm == 'u_pharm') {
+                    for (var j = 3; j < targetList1.length; j++) {
+                        // log.info('targetList1[i]',targetList1[j]);
+                        fs.unlinkSync(backupFolder_creSoty + '\\' + targetList1[j]);
+                    }
+                } else {
+                    //log.error('Before selection', targetList1);
+                    targetList1 = selectZIP001(targetList1);
+                    //log.error('After selection', targetList1);
+                    for (var j = 0; j < targetList1.length; j++) {
+                        // log.info('targetList1[i]',targetList1[j]);
+                        fs.unlinkSync(backupFolder_creSoty + '\\' + targetList1[j]);
+                    }
+                }
+                log.info('Backup 폴더 delete : Done');
+            }
+        }catch(err){
+            log.error('Backup 폴더 지우기 실패',err);
         }
-        log.info('Backup 폴더 delete : Done');
-      }
-    }catch(err){
-      log.error('Backup 폴더 지우기 실패',err);
-    }
 
-  }
+    }
 
 });
 
@@ -1604,7 +1617,7 @@ function fileSort(targetList){
 }
 
 function startCronJob(){
-  log.info('startCronJob');
+    log.info('startCronJob');
     // cron.schedule('38 13 16,17 * * *', () => {
     cron.schedule('13 14 0,5 * * *', () => {
         log.info('running startCronJob =======>>>>');
@@ -1614,4 +1627,32 @@ function startCronJob(){
             });
         }
     });
+}
+
+function selectZIP001(targetList1){
+
+    let dateList = [];
+    for (let i = 0; i < targetList1.length; i++) {
+        let temp = targetList1[i].match(/\d{4}-\d{2}-\d{2}/).toString();
+        dateList.push(temp);
+    }
+    //log.info('dateList in selectZIP001 before filter', dateList);
+    dateList = dateList.filter(function (elem, pos) {
+        return dateList.indexOf(elem) == pos;
+    })
+    //log.info('dateList in selectZIP001 after filter', dateList);
+    if (dateList.length <= 3) {
+        return [];
+    } else {
+        let ckecker = dateList[dateList.length - 1];
+        let result = [];
+        for (let i = 0; i < targetList1.length; i++) {
+            //log.info('dateList[i] in selectZIP001', dateList[i], ckecker);
+            if (targetList1[i].lastIndexOf(ckecker) >= 0) {
+                result.push(targetList1[i]);
+            }
+        }
+        return result;
+    }
+
 }
