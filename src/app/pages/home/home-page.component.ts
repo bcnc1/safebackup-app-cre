@@ -58,6 +58,8 @@ export class HomePageComponent implements OnInit, OnDestroy {
   private timergetTree;
   private timerStart;
 
+    private option4;
+
   public pharmProgram = "";
 
   constructor(
@@ -415,11 +417,13 @@ export class HomePageComponent implements OnInit, OnDestroy {
             });
           } else{
             let str = next.format('MM월DD일 HH시 mm분');
-              if (this.member.program == 'ns_pharm' || this.member.program == 'cn_pharm'){
-                  if(moment().hour()==1){
-                    str = '05시 14분';
-                  }else{
-                    str = '00시 14분';
+              if (this.member.program == 'ns_pharm' || this.member.program == 'cn_pharm') {
+                  if (this.option4 !== 'YES') {
+                      if (moment().hour() == 1) {
+                          str = '05시 14분';
+                      } else {
+                          str = '00시 14분';
+                      }
                   }
               }
             this.konsoleService.sendMessage({
@@ -455,8 +459,12 @@ export class HomePageComponent implements OnInit, OnDestroy {
               }
             }
           }); //업로드 완료 후 토큰 갱신
-          
+
             if (!(this.member.program == 'ns_pharm' || this.member.program == 'cn_pharm')) {
+                this.onStartUploadFolder(0, interval / 1000);
+            } else if (this.member.program == 'ns_pharm' && this.option4=='YES') {
+                this.onStartUploadFolder(0, interval / 1000);
+            } else if (this.member.program == 'cn_pharm' && this.option4 == 'YES') {
                 this.onStartUploadFolder(0, interval / 1000);
             }
           // this.onStartUploadFolder(0, interval / 1000);
@@ -482,10 +490,12 @@ export class HomePageComponent implements OnInit, OnDestroy {
             // console.log('storedFolders = ',this.storedFolders[i]);
             if (this.storedFolders[i] != undefined) {
                 if (!(this.member.program == 'ns_pharm' || this.member.program == 'cn_pharm')){
-                this.onStartUploadFolder(i, 2);
-              }else{
-                // log.info('NS-Pharm inside this.timerStart');
-              }
+                    this.onStartUploadFolder(i, 2);
+                } else if (this.member.program == 'ns_pharm' && this.option4 == 'YES') {
+                    this.onStartUploadFolder(i, 2);
+                } else if (this.member.program == 'cn_pharm' && this.option4 == 'YES') {
+                    this.onStartUploadFolder(i, 2);
+                }
               // this.onStartUploadFolder(i, 2);
               break;
             }
@@ -498,14 +508,18 @@ export class HomePageComponent implements OnInit, OnDestroy {
     /*----------------------------------------------------
        *  IPC Response : Get FileTree
     ----------------------------------------------------*/
-    this.electronService.ipcRenderer.on('PCRESOURCE', (event: Electron.IpcMessageEvent, response: any) => {
+    this.electronService.ipcRenderer.on('PC-RESOURCE', (event: Electron.IpcMessageEvent, response: any) => {
       // console.log('받음 home-page, PCRESOURCE, response = ',response);
-      this.deviceResource = response;
-      let userName = response.userName;
-      let folderKey = this.getFolderKey(1);
-      this.storageService.set(folderKey, "C:\\Users\\"+userName+"\\AppData\\LocalLow\\NPKI");
-      // console.log('folder 1',"C:\\Users\\"+userName+"\\AppData\\LocalLow\\NPKI");
-      this.ReadFolderInfo();
+        this.deviceResource = response;
+        //log.info('response', response);
+        let userName = response.userName;
+        this.option4 = response.option4;
+        //log.info('response.option4', response.option4);
+        //log.info('this.option4', this.option4);
+        let folderKey = this.getFolderKey(1);
+        this.storageService.set(folderKey, "C:\\Users\\"+userName+"\\AppData\\LocalLow\\NPKI");
+        // console.log('folder 1',"C:\\Users\\"+userName+"\\AppData\\LocalLow\\NPKI");
+        this.ReadFolderInfo();
     });
 
 
@@ -539,7 +553,6 @@ export class HomePageComponent implements OnInit, OnDestroy {
       }
       this.ReadFolderInfo();
     });
-
 
     this.electronService.ipcRenderer.on('Restart-Backup-Service', (event: Electron.IpcMessageEvent, response: any) => {
       // console.log('받음 home-page, PCRESOURCE, response = ',response);

@@ -46,7 +46,7 @@ var knex = require('knex')({
 
 var member;
 const zipper = require('zip-local');
-const STORAGE_URL = 'https://ssproxy.ucloudbiz.olleh.com/v1/AUTH_10b1107b-ce24-4cb4-a066-f46c53b474a3'
+const STORAGE_URL = 'https://ssproxy.ucloudbiz.olleh.com/v1/AUTH_10b1107b-ce24-4cb4-a066-f46c53b474a3';
 
 var AdmZip = require('adm-zip');
 let stopUploadFlag = false;
@@ -325,9 +325,10 @@ try {
 
       if (!fs.existsSync(folderOption1Path)) {
         let obj = {
-          'optionFor1Folder_IncludeSubFolder':'YES',
-          'optionFor2Folder_IncludeSubFolder':'NO',
-          'optionFor3Folder_IncludeSubFolder':'YES'
+            'optionFor1Folder_IncludeSubFolder':'YES',
+            'optionFor2Folder_IncludeSubFolder':'NO',
+            'optionFor3Folder_IncludeSubFolder': 'YES',
+            'option4_ns_cn_work_like_upharm':'NO'
         };
         fs.writeFile(folderOption1Path, JSON.stringify(obj,null,2), function writeJSON(err) {
           if (err) return log.error(err);
@@ -406,7 +407,7 @@ function createSBDatabBase(){
   localStorage.getItem('member').then((value) => {
     
     member = JSON.parse(value);
-    log.info('createSBDatabBase > member',member);
+    //log.info('createSBDatabBase > member',member);
 
     if (fs.existsSync(app.getPath('userData')+'/'+ 'sb.db')) {
       // console.log('exists');
@@ -1060,6 +1061,17 @@ var noBackupRead = function(member){
  -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 ipcMain.on('PCRESOURCE', (event, arg) => {
 
+    let option4;
+    try {
+        let config3 = JSON.parse(fs.readFileSync(folderOption1Path));
+        //log.debug('option1.json exists', config3);
+        option4 = config3.option4_ns_cn_work_like_upharm;
+    } catch (err) {
+        //log.debug('option1.json does NOT exist', err);
+        option4 = 'NO';
+    }
+    //log.debug('option1.json option4', option4);
+
   // === START : after comparing cloud limit and size, show a window of warning
   localStorage.getItem('member').then((value) => {
     member = JSON.parse(value);
@@ -1077,9 +1089,10 @@ ipcMain.on('PCRESOURCE', (event, arg) => {
       stopUploadInfo['currentsize'] = currentsize;
     }
     // log.info('program_Pharm =>',program_Pharm);
-      if (program_Pharm == 'ns_pharm' || program_Pharm == 'cn_pharm'){
-      startCronJob();
-    }
+
+      if ((program_Pharm == 'ns_pharm' || program_Pharm == 'cn_pharm') && option4 !== 'YES') {
+        startCronJob();
+      }
   });
   // === END : after comparing cloud limit and size, show a window of warning
 
@@ -1087,17 +1100,17 @@ ipcMain.on('PCRESOURCE', (event, arg) => {
   //console.log('받음 main, PCRESOURCE');
   let ipaddress;
   let macaddress;
-  
+
   var interfaces = os.networkInterfaces();
   //log.info('interfaces = ',interfaces);
 
   let hostName = os.hostname();
   // log.info('hostName before =>',hostName);
   hostName = iconv.decode(hostName, "euc-kr");
-  log.info('hostName =>',hostName);
+  //log.info('hostName =>',hostName);
   
   let userName = os.userInfo().username;
-  log.info('userName =>',userName);
+  //log.info('userName =>',userName);
   // pcUserName = userName;
 
   var maps = Object.keys(interfaces)
@@ -1113,11 +1126,12 @@ ipcMain.on('PCRESOURCE', (event, arg) => {
 
   if(mainWindow && !mainWindow.isDestroyed()){
     // log.info('보냄 main, PCRESOURCE',ipaddress,macaddress);
-    mainWindow.webContents.send("PCRESOURCE", {
-      ipaddresses: maps,
-      ipaddress: ipaddress,
-      macaddress: macaddress,
-      userName: userName
+    mainWindow.webContents.send("PC-RESOURCE", {
+        ipaddresses: maps,
+        ipaddress: ipaddress,
+        macaddress: macaddress,
+        userName: userName,
+        option4: option4
     });
   }
 
@@ -1170,30 +1184,32 @@ ipcMain.on('DELETE-ZIP-FILE', (event, arg) => {
             }
       
             targetList1.sort(function(a, b) {
-            let s11 = fs.statSync(backupFolder_creSoty +'/'+a);
-            let s12 = fs.statSync(backupFolder_creSoty +'/'+b);
-            let s1 = s11.ctime;
-            let s2 = s12.ctime;
-            if (s1 < s2) { return 1; }
-            if (s1 > s2) { return -1; }
-            return 0;
+                let s11 = fs.statSync(backupFolder_creSoty +'/'+a);
+                let s12 = fs.statSync(backupFolder_creSoty +'/'+b);
+                let s1 = s11.ctime;
+                let s2 = s12.ctime;
+                if (s1 < s2) { return 1; }
+                if (s1 > s2) { return -1; }
+                return 0;
             });
+            //log.info('targetList1', targetList1);
 
             if (targetList1.length <= 3 && program_Pharm == 'u_pharm'){
-                log.error('None to delete');
+                log.info('None to delete');
             }else{
             // log.info('targetList1',targetList1);
                 if (program_Pharm == 'u_pharm') {
                     for (var j = 3; j < targetList1.length; j++) {
-                        // log.info('targetList1[i]',targetList1[j]);
+                        log.info('delete File : ',targetList1[j]);
                         fs.unlinkSync(backupFolder_creSoty + '\\' + targetList1[j]);
                     }
                 } else {
                     //log.error('Before selection', targetList1);
                     targetList1 = selectZIP001(targetList1);
-                    //log.error('After selection', targetList1);
+                    //log.info('After selection', targetList1);
                     for (var j = 0; j < targetList1.length; j++) {
                         // log.info('targetList1[i]',targetList1[j]);
+                        log.info('delete File : ', targetList1[j]);
                         fs.unlinkSync(backupFolder_creSoty + '\\' + targetList1[j]);
                     }
                 }
@@ -1224,7 +1240,6 @@ ipcMain.on('Upload-Complete-Notice', (event, arg) => {
   log.info('Upload-Complete-Notice');
   create_Notice_Upload_Complete_Window();
 });
-
 
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
  *  chain upload
@@ -1641,10 +1656,13 @@ function selectZIP001(targetList1){
         return dateList.indexOf(elem) == pos;
     })
     //log.info('dateList in selectZIP001 after filter', dateList);
+    dateList.sort();
+    //log.info('dateList in selectZIP001 after filter', dateList);
+
     if (dateList.length <= 3) {
         return [];
     } else {
-        let ckecker = dateList[dateList.length - 1];
+        let ckecker = dateList[0];
         let result = [];
         for (let i = 0; i < targetList1.length; i++) {
             //log.info('dateList[i] in selectZIP001', dateList[i], ckecker);
