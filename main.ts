@@ -1514,7 +1514,7 @@ function zipProcess(selectedPath,resultElement,program_Pharm){
     let targetFile = fileName;
     // let a_Location = targetFile.toLowerCase().lastIndexOf('_');
     // let s1 = targetFile.substr(a_Location+1,10);
-    log.info('fileName in zip process',fileName);
+    //log.info('fileName in zip process',fileName);
     const regex = /\d{4}-\d{2}-\d{2}/;
     let found = fileName.match(regex).toString();
     let s1 = found;
@@ -1523,19 +1523,19 @@ function zipProcess(selectedPath,resultElement,program_Pharm){
     target1 = targetFile;
     const files = fs.readdirSync(selectedPath);
     for(let f of files){
-      log.info('f in zip process',f);
+      //log.info('f in zip process',f);
       //let fName = f.name;
       let found1 = f.match(regex).toString();
       if(found1 == found && f.toLowerCase().lastIndexOf('sql') > 0){
         target2 = selectedPath + '\\' + f;
-        log.info('target2 in zip process',target2);
+        //log.info('target2 in zip process',target2);
         break;
       }
     }
 
     // let target11 = target1.replace('.DMP','.sql');
     // target2 = target11.replace('DB','MariaDB');
-    log.info('CN Pharm Check',filepath,target1,target2);
+    //log.info('CN Pharm Check',filepath,target1,target2);
   }else if(program_Pharm == 'u_pharm'){
     let splitFullPath = fileName.split('\\');
     let splitFullPathLength = splitFullPath.length;
@@ -1552,7 +1552,7 @@ function zipProcess(selectedPath,resultElement,program_Pharm){
       var zip = new AdmZip();
       if(program_Pharm == 'cn_pharm' || program_Pharm =='ns_pharm'){
         if (program_Pharm == 'cn_pharm') {
-            log.info('start CN Pharm ZIP process');
+            //log.info('start CN Pharm ZIP process');
             let newTarget2 = target2.replace('sql','SQL');
             if(fs.existsSync(target2)){
               exec(installFolder + '\\extra\\7za', ['a', '-v1024m', filepath, target1, target2], function(err, data) {
