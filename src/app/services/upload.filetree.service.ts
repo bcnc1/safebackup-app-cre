@@ -82,7 +82,7 @@ export class UploadFiletreeService {
     });
 
     this.electronService.ipcRenderer.on('GETFOLDERTREE', (event: Electron.IpcMessageEvent, response: any) => {
-      //log.info('새로만든, 받음 GETFOLDERTREE, response = ',response);
+      log.info('새로만든, 받음 GETFOLDERTREE, response = ',response);
     
       //fullpath 변수 사용? 안하게?
       //목록 구성이 끝난 폴더의 사이즈 요청
@@ -138,7 +138,7 @@ export class UploadFiletreeService {
        
       ----------------------------------------------------*/
       this.electronService.ipcRenderer.on('CHAINTREE', (event: Electron.IpcMessageEvent, response: any) => {
-        //log.info('받음 CHAINTREE ');
+        log.info('받음 CHAINTREE ');
         console.log('requestChainErrorList =>CHAINTREE');
         const fileTree = response.tree; 
   

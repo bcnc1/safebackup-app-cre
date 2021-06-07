@@ -745,7 +745,7 @@ function addFileFromDir(arg, window, callback){
         }
 
     }, function(err) {
-      log.info("Finish scanning File List  = ", err);
+      log.info("Finish scanning File List err = ", err);
       watcher.close();
       callback(true);
       result = null;
@@ -809,7 +809,7 @@ function createNPKIzip(selectedPath, username){
  *  IPC : REQ-UPDATETREE
  -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 ipcMain.on("REQ-UPDATETREE", (event, arg) => {
-  console.log('받음, REQ-UPDATETREE, main folderIndex = ',arg.folderIndex);
+  log.info('받음, REQ-UPDATETREE, main folderIndex = ',arg.folderIndex);
  // var tableName = arg.username+':'+arg.folderIndex;
  var tableName = arg.username;
 
@@ -856,7 +856,7 @@ ipcMain.on("REQ-UPLOADTREE", (event, arg) => {
  *  모든 테이블을 뒤져야 한다.
  -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*/
 ipcMain.on("REQ-CHAINTREE", (event, arg) => {
-  //console.log('받음, REQ-CHAINTREE, main folderIndex = ',arg.folderIndex);
+  log.info('받음, REQ-CHAINTREE, main folderIndex = ',arg.folderIndex);
  
  //db 테이블이 1개일때..
   var tableName = arg.username;
@@ -1126,7 +1126,7 @@ ipcMain.on('PCRESOURCE', (event, arg) => {
 
   if(mainWindow && !mainWindow.isDestroyed()){
     // log.info('보냄 main, PCRESOURCE',ipaddress,macaddress);
-    mainWindow.webContents.send("PC-RESOURCE", {
+    mainWindow.webContents.send("PCRESOURCE", {
         ipaddresses: maps,
         ipaddress: ipaddress,
         macaddress: macaddress,
